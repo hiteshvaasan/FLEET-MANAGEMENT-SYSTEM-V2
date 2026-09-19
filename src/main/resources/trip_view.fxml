@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.fleetmanagement.controllers.TripController"
+            stylesheets="@style.css"
+            style="-fx-background-color: #f1f5f9;">
+
+    <!-- LEFT SIDEBAR -->
+    <left>
+        <VBox fx:id="sidebar" prefWidth="220" style="-fx-background-color: #0f172a;" spacing="2">
+            <padding><Insets top="25" right="0" bottom="25" left="0"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <VBox.margin><Insets left="15" right="10" bottom="30"/></VBox.margin>
+                <StackPane prefWidth="36" prefHeight="36" style="-fx-background-color: #2563eb; -fx-background-radius: 8;">
+                    <Label text="🚛" style="-fx-font-size: 18px;"/>
+                </StackPane>
+                <VBox spacing="0">
+                    <Label text="𝙁𝙇𝙀𝙀𝙏" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <Label text="𝙈𝘼𝙉𝘼𝙂𝙀𝙈𝙀𝙉𝙏" textFill="#94a3b8" style="-fx-font-weight: bold; -fx-font-size: 10px;"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="☰" onAction="#toggleSidebar" style="-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-font-size: 18px; -fx-cursor: hand; -fx-padding: 0;"/>
+            </HBox>
+
+            <Label text="  📊    Dashboard" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDashboard"/>
+            <Label text="  🚛    Vehicles" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToVehicles"/>
+            <Label text="  👨‍✈️    Drivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDrivers"/>
+            <Label text="  🛣️    Trips" textFill="WHITE" prefWidth="220" prefHeight="45" style="-fx-background-color: #2563eb; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToTrips"/>
+            <Label text="  🔧    Maintenance" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToMaintenance"/>
+            <Label text="  📈    Reports" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReports"/>
+            <Label text="  ⚙️    Settings" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToSettings"/>
+        </VBox>
+    </left>
+
+    <!-- CENTER CONTENT (Matches your original VBox layout) -->
+    <center>
+        <VBox spacing="15">
+            <padding><Insets top="20" right="25" bottom="20" left="25"/></padding>
+
+            <!-- ================= MAIN HEADER & OUTER TOGGLE ================= -->
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button fx:id="btnHamburger" text="☰" onAction="#toggleSidebar" visible="false" managed="false"
+                        prefHeight="35" prefWidth="40"
+                        style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-size: 18px; -fx-cursor: hand;"/>
+                <Label fx:id="headerLabel" text="Trip Management - Trip Details" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+            </HBox>
+
+            <!-- ================= CUSTOM TOP TAB BAR ================= -->
+            <HBox spacing="10">
+                <Button fx:id="btnTabTrip" text="Trip Details" prefWidth="120" prefHeight="35" onAction="#showTripPane"
+                        style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button fx:id="btnTabCargo" text="Cargo / Goods" prefWidth="120" prefHeight="35" onAction="#showCargoPane"
+                        style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button fx:id="btnTabFuel" text="Fuel" prefWidth="120" prefHeight="35" onAction="#showFuelPane"
+                        style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button fx:id="btnTabToll" text="Toll" prefWidth="120" prefHeight="35" onAction="#showTollPane"
+                        style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <Button fx:id="btnTabExpenses" text="Expenses" prefWidth="120" prefHeight="35" onAction="#showExpensesPane"
+                        style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
+            </HBox>
+
+            <!-- ================= STACK PANE (VIEW SWITCHER) ================= -->
+            <StackPane VBox.vgrow="ALWAYS">
+
+                <!-- 1. TRIP DETAILS VIEW -->
+                <VBox fx:id="paneTripDetails" spacing="15" visible="true">
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);">
+                        <padding><Insets top="18" right="22" bottom="18" left="22"/></padding>
+
+                        <GridPane hgap="20" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="100"/>
+                                <ColumnConstraints minWidth="190"/>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints minWidth="180"/>
+                            </columnConstraints>
+
+                            <Label text="Trip ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="tripIdField" promptText="e.g. T001" style="-fx-background-radius: 6;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                            <Label text="Status" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <ComboBox fx:id="statusComboBox" prefWidth="180" style="-fx-background-radius: 6;" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                            <Label text="Req. Capacity (kg)" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="reqCapacityField" promptText="e.g. 4500" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                            <Label text="Vehicle ID" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <HBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="3">
+                                <TextField fx:id="vehicleIdField" promptText="e.g. V001" prefWidth="120" style="-fx-background-radius: 6;"/>
+                                <Button text="🔍 View" onAction="#showAvailableVehiclesPopup" prefWidth="75"
+                                        style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            </HBox>
+
+                            <Label text="Driver ID" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <HBox spacing="8" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                                <TextField fx:id="driverIdField" promptText="e.g. D001" prefWidth="120" style="-fx-background-radius: 6;"/>
+                                <Button text="🔍 View" onAction="#showAvailableDriversPopup" prefWidth="75"
+                                        style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            </HBox>
+                            <Label text="Trip Date" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                            <DatePicker fx:id="tripDatePicker" prefWidth="180" style="-fx-background-radius: 6;" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+                            <Label text="Source" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <TextField fx:id="sourceField" promptText="e.g. Vellore" style="-fx-background-radius: 6;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                            <Label text="Destination" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                            <TextField fx:id="destinationField" promptText="e.g. Chennai" style="-fx-background-radius: 6;" GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+
+                            <Label text="Start Odo" style="-fx-font-weight: bold;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                            <TextField fx:id="startOdoField" promptText="e.g. 45000" style="-fx-background-radius: 6;" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                            <Label text="End Odo" style="-fx-font-weight: bold;" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+                            <TextField fx:id="endOdoField" promptText="e.g. 45140" style="-fx-background-radius: 6;" GridPane.rowIndex="4" GridPane.columnIndex="3"/>
+
+                            <Label text="Distance (km)" style="-fx-font-weight: bold;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                            <TextField fx:id="distanceField" promptText="Auto-calculated" editable="false"
+                                       style="-fx-background-radius: 6; -fx-background-color: #f8fafc; -fx-text-fill: #0f172a; -fx-font-weight: bold;"
+                                       GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                        </GridPane>
+
+                        <HBox spacing="10">
+                            <VBox.margin><Insets top="8"/></VBox.margin>
+                            <Button text="Add Trip" prefWidth="90" prefHeight="33"
+                                    style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;" onAction="#handleAddTrip"/>
+                            <Button text="Update" prefWidth="85" prefHeight="33"
+                                    style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;" onAction="#handleUpdateTrip"/>
+                            <Button text="Delete" prefWidth="85" prefHeight="33"
+                                    style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;" onAction="#handleDeleteTrip"/>
+                            <Button text="Clear" prefWidth="85" prefHeight="33"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;" onAction="#handleClearForm"/>
+                            <Button text="Clear All" prefWidth="85" prefHeight="33"
+                                    style="-fx-background-color: #7c2d12; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;" onAction="#handleClearAllTrips"/>
+                            <Button text="Recalculate Costs" prefWidth="140" prefHeight="33"
+                                    style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold;" onAction="#handleCalculateCosts"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Trip List Search Bar Section -->
+                    <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+                        <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                        <Label text="Trip Records" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Filter By:" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="filterCategoryComboBox" prefWidth="140" style="-fx-background-radius: 6;"/>
+                            <TextField fx:id="searchField" promptText="Enter keyword to search..." prefWidth="240" style="-fx-background-radius: 6;"/>
+                            <Button text="🔍 Search" onAction="#handleTripSearch" prefWidth="85"
+                                    style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Reset" onAction="#handleTripSearchReset" prefWidth="75"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        </HBox>
+
+                        <TableView fx:id="tripTable" prefHeight="250" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colTripId" text="Trip ID" prefWidth="80"/>
+                                <TableColumn fx:id="colVehicleId" text="Vehicle" prefWidth="80"/>
+                                <TableColumn fx:id="colDriverId" text="Driver" prefWidth="80"/>
+                                <TableColumn fx:id="colSource" text="Source" prefWidth="120"/>
+                                <TableColumn fx:id="colDestination" text="Destination" prefWidth="120"/>
+                                <TableColumn fx:id="colDate" text="Date" prefWidth="90"/>
+                                <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
+                                <TableColumn fx:id="colTotalCost" text="Total Cost (₹)" prefWidth="100"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+
+                <!-- 2. CARGO VIEW -->
+                <VBox fx:id="paneCargo" visible="false" spacing="15">
+                    <VBox style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);" VBox.vgrow="ALWAYS">
+                        <padding><Insets top="18" right="22" bottom="18" left="22"/></padding>
+
+                        <Label text="Map Cargo to Trip" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #0f172a;"/>
+
+                        <GridPane hgap="15" vgap="12">
+                            <VBox.margin><Insets top="12" bottom="12"/></VBox.margin>
+
+                            <Label text="Trip ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <HBox spacing="8" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                                <TextField fx:id="cargoTripIdField" promptText="e.g. T001" prefWidth="110" style="-fx-background-radius: 6;"/>
+                                <Button text="🔍 View" onAction="#showAvailableTripsForCargoPopup" prefWidth="75"
+                                        style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            </HBox>
+
+                            <Label text="Goods Type" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <TextField fx:id="cargoTypeField" promptText="e.g. Electronics" style="-fx-background-radius: 6;" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                            <Label text="Quantity" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="cargoQtyField" promptText="e.g. 20" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Weight (kg)" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <TextField fx:id="cargoWeightField" promptText="e.g. 450" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                            <Label text="Description" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <TextField fx:id="cargoDescField" promptText="Optional" prefWidth="250" style="-fx-background-radius: 6;" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                        </GridPane>
+
+                        <HBox spacing="10">
+                            <Button text="Add / Map" prefHeight="30" prefWidth="90" onAction="#handleAddCargo"
+                                    style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Update" prefHeight="30" prefWidth="80" onAction="#handleUpdateCargo"
+                                    style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Delete" prefHeight="30" prefWidth="80" onAction="#handleDeleteCargo"
+                                    style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Clear" prefHeight="30" prefWidth="75" onAction="#handleClearCargoForm"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Clear All" prefHeight="30" prefWidth="85" onAction="#handleClearAllCargo"
+                                    style="-fx-background-color: #7c2d12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Refresh Table" prefHeight="30" prefWidth="110" onAction="#loadAllCargo"
+                                    style="-fx-background-color: #334155; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        </HBox>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <VBox.margin><Insets top="15" bottom="10"/></VBox.margin>
+                            <Label text="Filter By:" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cargoFilterCategoryComboBox" prefWidth="150" style="-fx-background-radius: 6;"/>
+                            <TextField fx:id="cargoSearchField" promptText="Type to filter cargo..." prefWidth="280" style="-fx-background-radius: 6;"/>
+                        </HBox>
+
+                        <TableView fx:id="cargoTable" prefHeight="180" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colCargoId" text="Cargo ID" prefWidth="80"/>
+                                <TableColumn fx:id="colCargoTripId" text="Trip ID" prefWidth="80"/>
+                                <TableColumn fx:id="colCargoType" text="Goods Type" prefWidth="130"/>
+                                <TableColumn fx:id="colCargoQty" text="Quantity" prefWidth="80"/>
+                                <TableColumn fx:id="colCargoWeight" text="Weight (kg)" prefWidth="100"/>
+                                <TableColumn fx:id="colCargoDesc" text="Description" prefWidth="240"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+
+                <!-- 3. FUEL VIEW -->
+                <VBox fx:id="paneFuel" visible="false" spacing="15">
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);">
+                        <padding><Insets top="18" right="22" bottom="18" left="22"/></padding>
+                        <Label text="Fuel Expense Management" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #0f172a;"/>
+
+                        <GridPane hgap="20" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints minWidth="190"/>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints minWidth="190"/>
+                            </columnConstraints>
+
+                            <Label text="Fuel ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="fuelIdField" promptText="Auto-generated" editable="false" style="-fx-background-radius: 6; -fx-background-color: #f8fafc;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <Label text="Trip ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <HBox spacing="8" GridPane.rowIndex="0" GridPane.columnIndex="3">
+                                <TextField fx:id="fuelTripIdField" promptText="e.g. T003" prefWidth="110" style="-fx-background-radius: 6;"/>
+                                <Button text="🔍 View" onAction="#showAvailableTripsForFuelPopup" prefWidth="72"
+                                        style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            </HBox>
+
+                            <Label text="Vehicle ID" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="fuelVehicleIdField" promptText="Auto-filled" editable="false" style="-fx-background-radius: 6; -fx-background-color: #f8fafc;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Fuel Type" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <TextField fx:id="fuelTypeField" promptText="Auto-filled" editable="false" style="-fx-background-radius: 6; -fx-background-color: #f8fafc;" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                            <Label text="Distance (km)" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <TextField fx:id="fuelDistanceField" promptText="Auto-calculated" editable="false" style="-fx-background-radius: 6; -fx-background-color: #f8fafc;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="Fuel Used (L)" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                            <TextField fx:id="fuelUsedField" promptText="e.g. 40" style="-fx-background-radius: 6;" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+                            <Label text="Fuel Price (₹/L)" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <TextField fx:id="fuelPriceField" promptText="e.g. 95" style="-fx-background-radius: 6;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                            <Label text="Fuel Cost (₹)" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                            <TextField fx:id="fuelCostField" promptText="Auto-calculated" editable="false" style="-fx-background-radius: 6; -fx-background-color: #f8fafc; -fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+
+                            <Label text="Mileage (km/L)" style="-fx-font-weight: bold;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                            <TextField fx:id="fuelMileageField" promptText="Auto-calculated" editable="false" style="-fx-background-radius: 6; -fx-background-color: #f8fafc; -fx-font-weight: bold;" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                        </GridPane>
+
+                        <HBox spacing="10">
+                            <Button text="Add Fuel" prefHeight="33" prefWidth="90" onAction="#handleAddFuel"
+                                    style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Update" prefHeight="33" prefWidth="85" onAction="#handleUpdateFuel"
+                                    style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Delete" prefHeight="33" prefWidth="85" onAction="#handleDeleteFuel"
+                                    style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Clear" prefHeight="33" prefWidth="85" onAction="#handleClearFuelForm"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Clear All" prefHeight="33" prefWidth="95" onAction="#handleClearAllFuel"
+                                    style="-fx-background-color: #7c2d12; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Fuel Records Table & Search Section -->
+                    <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+                        <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                        <Label text="Fuel Records" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Filter By:" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="fuelFilterCategoryComboBox" prefWidth="140" style="-fx-background-radius: 6;"/>
+                            <TextField fx:id="fuelSearchField" promptText="Enter keyword to search..." prefWidth="240" style="-fx-background-radius: 6;"/>
+                            <Button text="🔍 Search" onAction="#handleFuelSearch" prefWidth="85"
+                                    style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Reset" onAction="#handleFuelSearchReset" prefWidth="75"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        </HBox>
+
+                        <TableView fx:id="fuelTable" prefHeight="180" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colFuelId" text="Fuel ID" prefWidth="75"/>
+                                <TableColumn fx:id="colFuelTripId" text="Trip ID" prefWidth="85"/>
+                                <TableColumn fx:id="colFuelVehicleId" text="Vehicle ID" prefWidth="90"/>
+                                <TableColumn fx:id="colFuelType" text="Fuel Type" prefWidth="90"/>
+                                <TableColumn fx:id="colFuelDistance" text="Distance" prefWidth="85"/>
+                                <TableColumn fx:id="colFuelUsed" text="Fuel Used" prefWidth="85"/>
+                                <TableColumn fx:id="colFuelPrice" text="Price/L" prefWidth="80"/>
+                                <TableColumn fx:id="colFuelCost" text="Cost (₹)" prefWidth="95"/>
+                                <TableColumn fx:id="colFuelMileage" text="Mileage" prefWidth="85"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+
+                <!-- 4. TOLL VIEW -->
+                <VBox fx:id="paneToll" visible="false" spacing="15">
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);">
+                        <padding><Insets top="18" right="22" bottom="18" left="22"/></padding>
+                        <Label text="Toll Management" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #0f172a;"/>
+
+                        <GridPane hgap="20" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints minWidth="190"/>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints minWidth="190"/>
+                            </columnConstraints>
+
+                            <Label text="Toll ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="tollIdField" promptText="Auto-generated" editable="false" style="-fx-background-radius: 6; -fx-background-color: #f8fafc;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <Label text="Trip ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <HBox spacing="8" GridPane.rowIndex="0" GridPane.columnIndex="3">
+                                <TextField fx:id="tollTripIdField" promptText="e.g. T001" prefWidth="110" style="-fx-background-radius: 6;"/>
+                                <Button text="🔍 View" onAction="#showAvailableTripsForTollPopup" prefWidth="72"
+                                        style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            </HBox>
+
+                            <Label text="Toll Name" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="tollNameField" promptText="e.g. Vellore Plaza" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Location" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <TextField fx:id="tollLocationField" promptText="e.g. Highway 44" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                            <Label text="Amount (₹)" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <TextField fx:id="tollAmountField" promptText="e.g. 120" style="-fx-background-radius: 6;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="Date" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                            <DatePicker fx:id="tollDatePicker" prefWidth="190" style="-fx-background-radius: 6;" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+                        </GridPane>
+
+                        <HBox spacing="10">
+                            <VBox.margin><Insets top="5"/></VBox.margin>
+                            <Button text="Add Toll" prefHeight="33" prefWidth="90" onAction="#handleAddToll"
+                                    style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Update" prefHeight="33" prefWidth="85" onAction="#handleUpdateToll"
+                                    style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Delete" prefHeight="33" prefWidth="85" onAction="#handleDeleteToll"
+                                    style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Clear" prefHeight="33" prefWidth="85" onAction="#handleClearTollForm"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Clear All" prefHeight="33" prefWidth="90" onAction="#handleClearAllTolls"
+                                    style="-fx-background-color: #991b1b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Toll Records Table -->
+                    <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+                        <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                        <Label text="Toll Records" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Filter By:" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="tollFilterCategoryComboBox" prefWidth="140" style="-fx-background-radius: 6;"/>
+                            <TextField fx:id="tollSearchField" promptText="Enter keyword to search..." prefWidth="240" style="-fx-background-radius: 6;"/>
+                            <Button text="🔍 Search" onAction="#handleTollSearch" prefWidth="85"
+                                    style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Reset" onAction="#handleTollSearchReset" prefWidth="75"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        </HBox>
+
+                        <TableView fx:id="tollTable" prefHeight="180" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colTollId" text="Toll ID" prefWidth="70"/>
+                                <TableColumn fx:id="colTollTripId" text="Trip ID" prefWidth="80"/>
+                                <TableColumn fx:id="colTollName" text="Toll Name" prefWidth="160"/>
+                                <TableColumn fx:id="colTollLocation" text="Location" prefWidth="140"/>
+                                <TableColumn fx:id="colTollAmount" text="Amount (₹)" prefWidth="100"/>
+                                <TableColumn fx:id="colTollDate" text="Date" prefWidth="110"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+
+                <!-- 5. EXPENSES VIEW -->
+                <VBox fx:id="paneExpenses" visible="false" spacing="15">
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);">
+                        <padding><Insets top="18" right="22" bottom="18" left="22"/></padding>
+                        <Label text="Expense Management" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #0f172a;"/>
+
+                        <GridPane hgap="20" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints minWidth="190"/>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints minWidth="190"/>
+                            </columnConstraints>
+
+                            <Label text="Expense ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <TextField fx:id="expIdField" promptText="Auto-generated" editable="false" style="-fx-background-radius: 6; -fx-background-color: #f8fafc;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                            <Label text="Trip ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <HBox spacing="8" GridPane.rowIndex="0" GridPane.columnIndex="3">
+                                <TextField fx:id="expTripIdField" promptText="e.g. T001" prefWidth="110" style="-fx-background-radius: 6;"/>
+                                <Button text="🔍 View" onAction="#showAvailableTripsForExpensePopup" prefWidth="72"
+                                        style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            </HBox>
+
+                            <Label text="Expense Type" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <ComboBox fx:id="expTypeComboBox" prefWidth="190" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Date" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <DatePicker fx:id="expDatePicker" prefWidth="190" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                            <Label text="Amount (₹)" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                            <TextField fx:id="expAmountField" promptText="e.g. 300" style="-fx-background-radius: 6;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                            <Label text="Description" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                            <TextField fx:id="expDescField" promptText="e.g. Driver food allowance" style="-fx-background-radius: 6;" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+                        </GridPane>
+
+                        <HBox spacing="10">
+                            <VBox.margin><Insets top="5"/></VBox.margin>
+                            <Button text="Add Expense" prefHeight="33" prefWidth="105" onAction="#handleAddExpense"
+                                    style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Update" prefHeight="33" prefWidth="85" onAction="#handleUpdateExpense"
+                                    style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Delete" prefHeight="33" prefWidth="85" onAction="#handleDeleteExpense"
+                                    style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Clear" prefHeight="33" prefWidth="85" onAction="#handleClearExpenseForm"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Clear All" prefHeight="33" prefWidth="90" onAction="#handleClearAllExpenses"
+                                    style="-fx-background-color: #991b1b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Expenses Table -->
+                    <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+                        <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                        <Label text="Expense Records" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Filter By:" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="expFilterCategoryComboBox" prefWidth="140" style="-fx-background-radius: 6;"/>
+                            <TextField fx:id="expSearchField" promptText="Enter keyword to search..." prefWidth="240" style="-fx-background-radius: 6;"/>
+                            <Button text="🔍 Search" onAction="#handleExpenseSearch" prefWidth="85"
+                                    style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Reset" onAction="#handleExpenseSearchReset" prefWidth="75"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        </HBox>
+
+                        <TableView fx:id="expTable" prefHeight="180" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colExpId" text="Expense ID" prefWidth="80"/>
+                                <TableColumn fx:id="colExpTripId" text="Trip ID" prefWidth="80"/>
+                                <TableColumn fx:id="colExpType" text="Expense Type" prefWidth="140"/>
+                                <TableColumn fx:id="colExpAmount" text="Amount (₹)" prefWidth="100"/>
+                                <TableColumn fx:id="colExpDate" text="Date" prefWidth="110"/>
+                                <TableColumn fx:id="colExpDesc" text="Description" prefWidth="220"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+            </StackPane>
+        </VBox>
+    </center>
+</BorderPane>

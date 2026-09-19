@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.fleetmanagement.controllers.SettingsController"
+            stylesheets="@style.css"
+            style="-fx-background-color: #f1f5f9;">
+
+    <!-- LEFT SIDEBAR -->
+    <left>
+        <VBox fx:id="sidebar" prefWidth="220" style="-fx-background-color: #0f172a;" spacing="2">
+            <padding><Insets top="25" right="0" bottom="25" left="0"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <VBox.margin><Insets left="15" right="10" bottom="30"/></VBox.margin>
+                <StackPane prefWidth="36" prefHeight="36" style="-fx-background-color: #2563eb; -fx-background-radius: 8;">
+                    <Label text="🚛" style="-fx-font-size: 18px;"/>
+                </StackPane>
+                <VBox spacing="0">
+                    <Label text="𝙁𝙇𝙀𝙀𝙏" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <Label text="𝙈𝘼𝙉𝘼𝙂𝙀𝙈𝙀𝙉𝙏" textFill="#94a3b8" style="-fx-font-weight: bold; -fx-font-size: 10px;"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="☰" onAction="#toggleSidebar" style="-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-font-size: 18px; -fx-cursor: hand; -fx-padding: 0;"/>
+            </HBox>
+
+            <Label text="  📊    Dashboard" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDashboard"/>
+            <Label text="  🚛    Vehicles" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToVehicles"/>
+            <Label text="  👨‍✈️    Drivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDrivers"/>
+            <Label text="  🛣️    Trips" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToTrips"/>
+            <Label text="  🔧    Maintenance" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToMaintenance"/>
+            <Label text="  📈    Reports" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReports"/>
+            <Label text="  ⚙️    Settings" textFill="WHITE" prefWidth="220" prefHeight="45" style="-fx-background-color: #2563eb; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToSettings"/>
+        </VBox>
+    </left>
+
+    <!-- CENTER CONTENT -->
+    <center>
+        <VBox spacing="15">
+            <padding>
+                <Insets top="20" right="25" bottom="20" left="25"/>
+            </padding>
+
+            <!-- HEADER & HAMBURGER -->
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button fx:id="btnHamburger" text="☰" onAction="#toggleSidebar" visible="false" managed="false"
+                        prefHeight="35" prefWidth="40"
+                        style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-size: 18px; -fx-cursor: hand;"/>
+                <Label text="Settings" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+            </HBox>
+
+            <!-- SETTINGS CONTAINER -->
+            <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);">
+                <padding>
+                    <Insets top="22" right="25" bottom="22" left="25"/>
+                </padding>
+
+                <!-- ACCOUNT SETTINGS SECTION -->
+                <VBox spacing="12">
+                    <Label text="ACCOUNT SETTINGS" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #2563eb;"/>
+
+                    <GridPane hgap="20" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="150"/>
+                            <ColumnConstraints minWidth="260"/>
+                        </columnConstraints>
+
+                        <Label text="Username" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <TextField fx:id="usernameField" text="admin" prefWidth="260" style="-fx-background-radius: 6;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                        <Label text="Current Password" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <StackPane GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <PasswordField fx:id="currentPasswordField" promptText="••••••••" prefWidth="260" style="-fx-background-radius: 6;"/>
+                            <TextField fx:id="currentPasswordTextField" promptText="••••••••" prefWidth="260" style="-fx-background-radius: 6;" visible="false" managed="false"/>
+                        </StackPane>
+
+                        <Label text="New Password" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <StackPane GridPane.rowIndex="2" GridPane.columnIndex="1">
+                            <PasswordField fx:id="newPasswordField" promptText="••••••••" prefWidth="260" style="-fx-background-radius: 6;"/>
+                            <TextField fx:id="newPasswordTextField" promptText="••••••••" prefWidth="260" style="-fx-background-radius: 6;" visible="false" managed="false"/>
+                        </StackPane>
+
+                        <Label text="Confirm Password" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <StackPane GridPane.rowIndex="3" GridPane.columnIndex="1">
+                            <PasswordField fx:id="confirmPasswordField" promptText="••••••••" prefWidth="260" style="-fx-background-radius: 6;"/>
+                            <TextField fx:id="confirmPasswordTextField" promptText="••••••••" prefWidth="260" style="-fx-background-radius: 6;" visible="false" managed="false"/>
+                        </StackPane>
+                    </GridPane>
+
+                    <CheckBox fx:id="showPasswordCheckBox" text="Show Password" style="-fx-cursor: hand;">
+                        <VBox.margin><Insets top="3"/></VBox.margin>
+                    </CheckBox>
+                </VBox>
+
+                <Separator style="-fx-padding: 5 0 5 0;"/>
+
+                <!-- APPLICATION SETTINGS SECTION -->
+                <VBox spacing="12">
+                    <Label text="APPLICATION SETTINGS" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #2563eb;"/>
+
+                    <GridPane hgap="20" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="150"/>
+                            <ColumnConstraints minWidth="260"/>
+                        </columnConstraints>
+
+                        <Label text="Theme" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="themeComboBox" prefWidth="260" style="-fx-background-radius: 6;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                        <Label text="Notifications" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <CheckBox fx:id="notificationsCheckBox" text="Enable Notifications" selected="true" style="-fx-cursor: hand;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    </GridPane>
+                </VBox>
+
+                <!-- ACTION BUTTONS -->
+                <HBox spacing="12">
+                    <VBox.margin><Insets top="10"/></VBox.margin>
+
+                    <Button fx:id="btnSave" text="Save Changes" prefWidth="120" prefHeight="33"
+                            style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"
+                            onAction="#handleSaveSettings"/>
+
+                    <Button fx:id="btnClear" text="Clear" prefWidth="85" prefHeight="33"
+                            style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"
+                            onAction="#handleClearForm"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

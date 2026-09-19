@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.fleetmanagement.controllers.LoginController"
+           stylesheets="@style.css"
+           style="-fx-background-image: url('login_bg.png'); -fx-background-size: cover; -fx-background-position: center;">
+
+    <!-- TOP-LEFT BRANDING -->
+    <VBox alignment="TOP_LEFT" spacing="2" StackPane.alignment="TOP_LEFT">
+        <padding><Insets top="30" left="40"/></padding>
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <Label text="🚛" style="-fx-font-size: 28px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: white;"/>
+            <VBox spacing="0">
+                <Label text="FLEET MANAGEMENT" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                <Label text="Smarter Fleet  |  Safer Journeys  |  Better Tomorrow" style="-fx-font-size: 11px; -fx-text-fill: #cbd5e1;"/>
+            </VBox>
+        </HBox>
+    </VBox>
+
+    <!-- CENTERED LOGIN CARD -->
+    <VBox alignment="TOP_CENTER" maxWidth="420" maxHeight="520" spacing="0"
+          style="-fx-background-color: white; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 8);"
+          StackPane.alignment="CENTER">
+
+        <!-- BLUE BANNER HEADER INSIDE CARD -->
+        <VBox alignment="CENTER" spacing="8" style="-fx-background-color: #1d4ed8; -fx-background-radius: 14 14 0 0; -fx-padding: 25 20 25 20;">
+            <Label text="🚛" style="-fx-font-size: 32px; -fx-font-family: 'Segoe UI Emoji';"/>
+        </VBox>
+
+        <!-- CARD BODY -->
+        <VBox spacing="15" style="-fx-padding: 20 30 30 30;">
+            <VBox alignment="CENTER" spacing="2">
+                <Label text="FLEET MANAGEMENT" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Label text="Sign in to your account" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+            </VBox>
+
+            <VBox spacing="12">
+                <VBox spacing="4">
+                    <Label text="Username" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                    <TextField fx:id="usernameField" promptText="👤   Enter username" prefHeight="38" style="-fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6;"/>
+                </VBox>
+
+                <VBox spacing="4">
+                    <Label text="Password" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                    <StackPane>
+                        <PasswordField fx:id="passwordField" promptText="🔒   Enter password" prefHeight="38" style="-fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6;"/>
+                        <TextField fx:id="visiblePasswordField" promptText="🔒   Enter password" prefHeight="38" visible="false" managed="false" style="-fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6;"/>
+                    </StackPane>
+                </VBox>
+
+                <CheckBox fx:id="showPasswordCheckBox" text="Show Password" onAction="#handleShowPasswordToggle" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+            </VBox>
+
+            <Button text="Sign In" onAction="#handleLogin" prefWidth="Infinity" prefHeight="40" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 6; -fx-cursor: hand;"/>
+        </VBox>
+    </VBox>
+</StackPane>

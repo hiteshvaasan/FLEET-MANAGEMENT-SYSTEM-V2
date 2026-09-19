@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.fleetmanagement.controllers.DashboardController"
+            stylesheets="@style.css"
+            style="-fx-background-color: #f1f5f9;">
+
+    <!-- TOP MENUBAR -->
+    <top>
+        <MenuBar fx:id="menuBar">
+            <menus>
+                <Menu text="File">
+                    <items>
+                        <MenuItem text="New Trip" onAction="#handleFileNewTrip"/>
+                        <MenuItem text="Refresh" onAction="#handleFileRefresh"/>
+                        <SeparatorMenuItem/>
+                        <MenuItem text="Logout" onAction="#handleFileLogout"/>
+                        <MenuItem text="Exit" onAction="#handleFileExit"/>
+                    </items>
+                </Menu>
+                <Menu text="Master">
+                    <items>
+                        <MenuItem text="Vehicle Management" onAction="#switchToVehicles"/>
+                        <MenuItem text="Driver Management" onAction="#switchToDrivers"/>
+                    </items>
+                </Menu>
+                <Menu text="Transactions">
+                    <items>
+                        <MenuItem text="Trip Management" onAction="#switchToTrips"/>
+                        <MenuItem text="Maintenance" onAction="#switchToMaintenance"/>
+                    </items>
+                </Menu>
+                <Menu text="Reports">
+                    <items>
+                        <MenuItem text="Reports Overview" onAction="#switchToReports"/>
+                    </items>
+                </Menu>
+                <Menu text="Settings">
+                    <items>
+                        <MenuItem text="Settings" onAction="#switchToSettings"/>
+                    </items>
+                </Menu>
+                <Menu text="Help">
+                    <items>
+                        <MenuItem text="User Guide" onAction="#showUserGuide"/>
+                        <MenuItem text="About" onAction="#handleHelpAbout"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+
+    <!-- LEFT SIDEBAR -->
+    <left>
+        <VBox fx:id="sidebar" prefWidth="220" style="-fx-background-color: #0f172a;" spacing="2">
+            <padding><Insets top="25" right="0" bottom="25" left="0"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <VBox.margin><Insets left="15" right="10" bottom="30"/></VBox.margin>
+                <StackPane prefWidth="36" prefHeight="36" style="-fx-background-color: #2563eb; -fx-background-radius: 8;">
+                    <Label text="🚛" style="-fx-font-size: 18px;"/>
+                </StackPane>
+                <VBox spacing="0">
+                    <Label text="𝙁𝙇𝙀𝙀𝙏" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <Label text="𝙈𝘼𝙉𝘼𝙂𝙀𝙈𝙀𝙉𝙏" textFill="#94a3b8" style="-fx-font-weight: bold; -fx-font-size: 10px;"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="☰" onAction="#toggleSidebar" style="-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-font-size: 18px; -fx-cursor: hand; -fx-padding: 0;"/>
+            </HBox>
+
+            <Label text="  📊    Dashboard" textFill="WHITE" prefWidth="220" prefHeight="45" style="-fx-background-color: #2563eb; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDashboard"/>
+            <Label text="  🚛    Vehicles" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToVehicles"/>
+            <Label text="  👨‍✈️    Drivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDrivers"/>
+            <Label text="  🛣️    Trips" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToTrips"/>
+            <Label text="  🔧    Maintenance" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToMaintenance"/>
+            <Label text="  📈    Reports" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReports"/>
+            <Label text="  ⚙️    Settings" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToSettings"/>
+        </VBox>
+    </left>
+
+    <!-- CENTER DASHBOARD CONTENT -->
+    <center>
+        <VBox spacing="20">
+            <padding><Insets top="20" right="25" bottom="20" left="25"/></padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button fx:id="btnHamburger" text="☰" onAction="#toggleSidebar" visible="false" managed="false" prefHeight="35" prefWidth="40" style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-size: 18px; -fx-cursor: hand;"/>
+                <Label text="Dashboard Overview" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🔄 Refresh" onAction="#handleRefresh" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+            </HBox>
+
+            <!-- KPI CARDS GRID -->
+            <GridPane hgap="15" vgap="15">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.33"/>
+                    <ColumnConstraints percentWidth="33.33"/>
+                    <ColumnConstraints percentWidth="33.33"/>
+                </columnConstraints>
+
+                <!-- Card 1: Total Vehicles -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #2563eb; -fx-border-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                    <HBox alignment="CENTER">
+                        <VBox HBox.hgrow="ALWAYS" spacing="2">
+                            <Label text="Total Vehicles" textFill="#2563eb" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                            <Label fx:id="lblTotalVehicles" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #2563eb;"/>
+                        </VBox>
+                        <Label text="🚙" style="-fx-font-size: 38px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: #2563eb;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Card 2: Available Vehicles -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #16a34a; -fx-border-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                    <HBox alignment="CENTER">
+                        <VBox HBox.hgrow="ALWAYS" spacing="2">
+                            <Label text="Available Vehicles" textFill="#16a34a" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                            <Label fx:id="lblAvailableVehicles" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #16a34a;"/>
+                        </VBox>
+                        <Label text="🚛" style="-fx-font-size: 38px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: #16a34a;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Card 3: Total Drivers -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #9333ea; -fx-border-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" GridPane.rowIndex="0" GridPane.columnIndex="2">
+                    <HBox alignment="CENTER">
+                        <VBox HBox.hgrow="ALWAYS" spacing="2">
+                            <Label text="Total Drivers" textFill="#9333ea" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                            <Label fx:id="lblTotalDrivers" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #9333ea;"/>
+                        </VBox>
+                        <Label text="👨‍✈️" style="-fx-font-size: 38px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: #9333ea;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Card 4: Active Trips -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #ea580c; -fx-border-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                    <HBox alignment="CENTER">
+                        <VBox HBox.hgrow="ALWAYS" spacing="2">
+                            <Label text="Active Trips" textFill="#ea580c" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                            <Label fx:id="lblActiveTrips" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #ea580c;"/>
+                        </VBox>
+                        <Label text="🚚" style="-fx-font-size: 38px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: #ea580c;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Card 5: Completed Trips -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #0284c7; -fx-border-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                    <HBox alignment="CENTER">
+                        <VBox HBox.hgrow="ALWAYS" spacing="2">
+                            <Label text="Completed Trips" textFill="#0284c7" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                            <Label fx:id="lblCompletedTrips" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #0284c7;"/>
+                        </VBox>
+                        <Label text="🏁" style="-fx-font-size: 38px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: #0284c7;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Card 6: Under Maintenance -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-color: #dc2626; -fx-border-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" GridPane.rowIndex="1" GridPane.columnIndex="2">
+                    <HBox alignment="CENTER">
+                        <VBox HBox.hgrow="ALWAYS" spacing="2">
+                            <Label text="Under Maintenance" textFill="#dc2626" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                            <Label fx:id="lblMaintenanceVehicles" text="0" style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #dc2626;"/>
+                        </VBox>
+                        <Label text="🔧" style="-fx-font-size: 38px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: #dc2626;"/>
+                    </HBox>
+                </VBox>
+            </GridPane>
+
+            <!-- DATA SECTION: PIE CHART & RECENT TRIPS -->
+            <HBox spacing="15" VBox.vgrow="ALWAYS">
+                <!-- VEHICLE STATUS PIE CHART -->
+                <VBox spacing="10" prefWidth="320" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+                    <Label text="Vehicle Status Breakdown" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <PieChart fx:id="vehiclePieChart" legendSide="BOTTOM" VBox.vgrow="ALWAYS" prefHeight="320" minHeight="280"/>
+                </VBox>
+
+                <!-- RECENT TRIPS TABLE -->
+                <VBox spacing="10" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+                    <Label text="Recent Trips" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <TableView fx:id="tableRecentTrips" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colTripId" text="Trip ID" prefWidth="80"/>
+                            <TableColumn fx:id="colVehicle" text="Vehicle" prefWidth="80"/>
+                            <TableColumn fx:id="colDriver" text="Driver" prefWidth="80"/>
+                            <TableColumn fx:id="colSource" text="Source" prefWidth="100"/>
+                            <TableColumn fx:id="colDestination" text="Destination" prefWidth="100"/>
+                            <TableColumn fx:id="colDate" text="Trip Date" prefWidth="90"/>
+                            <TableColumn fx:id="colDistance" text="Distance" prefWidth="75"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </HBox>
+
+            <!-- FINANCIAL SUMMARY CARDS ROW -->
+            <GridPane hgap="15" vgap="15">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.33"/>
+                    <ColumnConstraints percentWidth="33.33"/>
+                    <ColumnConstraints percentWidth="33.33"/>
+                </columnConstraints>
+
+                <!-- Fuel Cost Card -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                    <HBox alignment="CENTER">
+                        <VBox HBox.hgrow="ALWAYS" spacing="2">
+                            <Label text="Total Fuel Cost" textFill="#64748b" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblFuelCost" text="₹ 0.00" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2563eb;"/>
+                        </VBox>
+                        <Label text="⛽" style="-fx-font-size: 30px; -fx-font-family: 'Segoe UI Emoji';"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Toll Cost Card -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                    <HBox alignment="CENTER">
+                        <VBox HBox.hgrow="ALWAYS" spacing="2">
+                            <Label text="Total Toll Cost" textFill="#64748b" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblTollCost" text="₹ 0.00" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #16a34a;"/>
+                        </VBox>
+                        <Label text="🛣️" style="-fx-font-size: 30px; -fx-font-family: 'Segoe UI Emoji';"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Total Expense Card -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);" GridPane.rowIndex="0" GridPane.columnIndex="2">
+                    <HBox alignment="CENTER">
+                        <VBox HBox.hgrow="ALWAYS" spacing="2">
+                            <Label text="Total Expense" textFill="#64748b" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                            <Label fx:id="lblTotalExpense" text="₹ 0.00" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #dc2626;"/>
+                        </VBox>
+                        <Label text="💰" style="-fx-font-size: 30px; -fx-font-family: 'Segoe UI Emoji';"/>
+                    </HBox>
+                </VBox>
+            </GridPane>
+        </VBox>
+    </center>
+</BorderPane>

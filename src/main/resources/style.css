@@ -1,0 +1,30 @@
+/* Button Pressing and Hover Effects */
+.button {
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-opacity: 0.92;
+}
+
+.button:pressed {
+    -fx-translate-y: 2px;
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+    -fx-opacity: 0.8;
+}
+
+/* Refined PieChart Colors */
+.chart-pie.data0 { -fx-pie-color: #16a34a; } /* Available - Green */
+.chart-pie.data1 { -fx-pie-color: #ea580c; } /* On Trip - Orange */
+.chart-pie.data2 { -fx-pie-color: #dc2626; } /* Under Maintenance - Red */
+
+/* Modern Legend and Background Polish */
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+}
+.chart-legend-item {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+}
