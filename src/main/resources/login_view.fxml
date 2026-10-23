@@ -2,7 +2,11 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Line?>
 
 <StackPane xmlns="http://javafx.com/javafx"
            xmlns:fx="http://javafx.com/fxml"
@@ -22,30 +26,31 @@
         </HBox>
     </VBox>
 
-    <!-- CENTERED LOGIN CARD -->
+    <!-- CLEAN MAIN LOGIN CARD -->
     <VBox alignment="TOP_CENTER" maxWidth="420" maxHeight="520" spacing="0"
           style="-fx-background-color: white; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 0, 8);"
           StackPane.alignment="CENTER">
 
-        <!-- BLUE BANNER HEADER INSIDE CARD -->
-        <VBox alignment="CENTER" spacing="8" style="-fx-background-color: #1d4ed8; -fx-background-radius: 14 14 0 0; -fx-padding: 25 20 25 20;">
+        <!-- BLUE BANNER HEADER -->
+        <VBox alignment="CENTER" spacing="8" style="-fx-background-color: #1d4ed8; -fx-background-radius: 14 14 0 0; -fx-padding: 22 20 22 20;">
             <Label text="🚛" style="-fx-font-size: 32px; -fx-font-family: 'Segoe UI Emoji';"/>
         </VBox>
 
         <!-- CARD BODY -->
-        <VBox spacing="15" style="-fx-padding: 20 30 30 30;">
+        <VBox spacing="14" style="-fx-padding: 20 30 25 30;">
             <VBox alignment="CENTER" spacing="2">
                 <Label text="FLEET MANAGEMENT" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                 <Label text="Sign in to your account" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
             </VBox>
 
-            <VBox spacing="12">
-                <VBox spacing="4">
+            <!-- INPUT FIELDS -->
+            <VBox spacing="10">
+                <VBox spacing="3">
                     <Label text="Username" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
                     <TextField fx:id="usernameField" promptText="👤   Enter username" prefHeight="38" style="-fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6;"/>
                 </VBox>
 
-                <VBox spacing="4">
+                <VBox spacing="3">
                     <Label text="Password" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #475569;"/>
                     <StackPane>
                         <PasswordField fx:id="passwordField" promptText="🔒   Enter password" prefHeight="38" style="-fx-background-radius: 6; -fx-border-color: #cbd5e1; -fx-border-radius: 6;"/>
@@ -53,10 +58,114 @@
                     </StackPane>
                 </VBox>
 
-                <CheckBox fx:id="showPasswordCheckBox" text="Show Password" onAction="#handleShowPasswordToggle" style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                <CheckBox fx:id="showPasswordCheckBox" text="Show Password" onAction="#handleShowPasswordToggle" style="-fx-font-size: 11px; -fx-text-fill: #64748b;"/>
             </VBox>
 
-            <Button text="Sign In" onAction="#handleLogin" prefWidth="Infinity" prefHeight="40" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 6; -fx-cursor: hand;"/>
+            <!-- CAPTCHA TRIGGER BUTTON -->
+            <Button fx:id="btnOpenCaptcha" text="🤖 Click to Verify Security CAPTCHA" onAction="#handleOpenCaptcha" prefWidth="Infinity" prefHeight="36"
+                    style="-fx-background-color: #f1f5f9; -fx-text-fill: #1e293b; -fx-font-size: 12px; -fx-font-weight: bold; -fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;"/>
+
+            <!-- SIGN IN BUTTON -->
+            <Button fx:id="btnLogin" text="Sign In" onAction="#handleLogin" disable="true" prefWidth="Infinity" prefHeight="40" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-background-radius: 6; -fx-cursor: hand;"/>
+
+            <!-- BACK BUTTON -->
+            <Button text="← Back to Main Portal" onAction="#handleBackToPortal" prefWidth="Infinity" prefHeight="36" style="-fx-background-color: transparent; -fx-text-fill: #16a34a; -fx-font-size: 12px; -fx-font-weight: bold; -fx-border-color: #16a34a; -fx-border-radius: 6; -fx-background-radius: 6; -fx-cursor: hand;"/>
         </VBox>
     </VBox>
+
+    <!-- ================= FLOATING POPUP MODAL OVERLAY (CAPTCHA) ================= -->
+    <StackPane fx:id="captchaOverlay" visible="false" managed="false" style="-fx-background-color: rgba(15, 23, 42, 0.75);">
+
+        <VBox alignment="TOP_CENTER" maxWidth="480" maxHeight="450" spacing="15"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 25, 0, 0, 10);"
+              StackPane.alignment="CENTER">
+
+            <!-- MODAL HEADER -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="🤖 Security Verification" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" HBox.hgrow="ALWAYS"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#handleCloseCaptcha" style="-fx-background-color: transparent; -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #64748b; -fx-cursor: hand;"/>
+            </HBox>
+
+            <Label text="Drag the image into the designated box to verify you are human." style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+
+            <!-- LARGE DRAG & DROP AREA -->
+            <HBox alignment="CENTER" spacing="30" style="-fx-background-color: #f8fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 20;">
+
+                <!-- DRAG SOURCE IMAGE (LARGE SIZE) -->
+                <VBox alignment="CENTER" spacing="5">
+                    <ImageView fx:id="dragSource" fitHeight="140" fitWidth="85" preserveRatio="true" style="-fx-cursor: hand;">
+                        <image>
+                            <Image url="@dhoni.jpg"/>
+                        </image>
+                    </ImageView>
+                    <Label text="Drag Me" style="-fx-font-size: 11px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
+                </VBox>
+
+                <Label text="➔" style="-fx-font-size: 24px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;"/>
+
+                <!-- DROP TARGET BOX (LARGE SIZE) -->
+                <StackPane fx:id="dropTarget" prefWidth="110" prefHeight="160" style="-fx-border-color: #2563eb; -fx-border-style: dashed; -fx-border-width: 2.5; -fx-border-radius: 12; -fx-background-radius: 12; -fx-background-color: white;">
+                    <Label fx:id="dropTargetLabel" text="Drop Image Here" style="-fx-font-size: 11px; -fx-text-fill: #94a3b8; -fx-font-weight: bold;" wrapText="true" textAlignment="CENTER"/>
+                    <ImageView fx:id="dropTargetImage" fitHeight="140" fitWidth="85" preserveRatio="true" visible="false"/>
+                </StackPane>
+            </HBox>
+
+            <!-- AUDIO QUESTION SECTION -->
+            <VBox fx:id="audioPromptBox" alignment="CENTER" spacing="8" visible="false" managed="false" style="-fx-background-color: #eff6ff; -fx-border-color: #bfdbfe; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;">
+                <Label text="🎵 Playing 6-Second BGM Verification Tune..." style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #1d4ed8;"/>
+                <Label text="Did you hear the sound clearly?" style="-fx-font-size: 12px; -fx-text-fill: #1e293b;"/>
+                <HBox alignment="CENTER" spacing="15">
+                    <Button text="YES, I HEARD IT" onAction="#handleAudioYes" style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 16;"/>
+                    <Button text="NO" onAction="#handleAudioNo" style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 16;"/>
+                </HBox>
+            </VBox>
+
+            <!-- STATUS MSG -->
+            <Label fx:id="lblVerificationStatus" text="Waiting for drag action..." style="-fx-font-size: 11px; -fx-text-fill: #64748b;" alignment="CENTER"/>
+        </VBox>
+    </StackPane>
+
+    <!-- ================= SIGN-IN TRUCK ANIMATION OVERLAY ================= -->
+    <StackPane fx:id="signInOverlay" visible="false" managed="false" style="-fx-background-color: rgba(15, 23, 42, 0.80);">
+
+        <VBox alignment="CENTER" maxWidth="420" maxHeight="260" spacing="14"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 25, 0, 0, 10);"
+              StackPane.alignment="CENTER">
+
+            <!-- ANIMATION SCENE: building -> road -> building -->
+            <Pane fx:id="animScene" prefWidth="360" minWidth="360" maxWidth="360"
+                  prefHeight="110" minHeight="110" maxHeight="110">
+
+                <!-- START BUILDING -->
+                <Label text="🏭" layoutX="5" layoutY="22"
+                       style="-fx-font-size: 52px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: #475569;"/>
+
+                <!-- DESTINATION BUILDING -->
+                <Label fx:id="destBuilding" text="🏢" layoutX="295" layoutY="22"
+                       style="-fx-font-size: 52px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: #1d4ed8;"/>
+
+                <!-- ROAD -->
+                <Line startX="0" startY="92" endX="360" endY="92" stroke="#94a3b8" strokeWidth="3"/>
+
+                <!-- TRUCK (scaleX=-1 flips it so it faces right) -->
+                <Label fx:id="truckLabel" text="🚛" layoutX="65" layoutY="42" scaleX="-1"
+                       style="-fx-font-size: 36px; -fx-font-family: 'Segoe UI Emoji'; -fx-text-fill: #1d4ed8;"/>
+
+                <!-- SUCCESS TICK -->
+                <StackPane fx:id="tickBadge" layoutX="150" layoutY="22" prefWidth="60" prefHeight="60"
+                           visible="false" scaleX="0" scaleY="0">
+                    <Circle radius="30" fill="#16a34a"/>
+                    <Label text="✔" style="-fx-font-size: 30px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                </StackPane>
+            </Pane>
+
+            <!-- CAPTION -->
+            <Label fx:id="lblSignInCaption" text="Signing in..."
+                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+            <Label fx:id="lblSignInSub" text="Verifying your credentials"
+                   style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+        </VBox>
+    </StackPane>
+
 </StackPane>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receiver Login - Fleet Management</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+        }
+        .icon { font-size: 45px; margin-bottom: 10px; }
+        h2 { margin: 0 0 5px 0; color: #0f172a; font-size: 24px; }
+        p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        input:focus { outline: none; border-color: #d97706; }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #d97706;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #b45309; }
+
+        .error-msg { color: #dc2626; font-size: 13px; margin-bottom: 15px; display: none; font-weight: bold; }
+        .back-link { display: inline-block; margin-top: 20px; color: #3b82f6; text-decoration: none; font-size: 14px; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="icon">🎁</div>
+    <h2>Receiver Portal</h2>
+    <p>Login to track your shipments</p>
+
+    <div id="errorMsg" class="error-msg">Invalid ID or Password</div>
+
+    <input type="text" id="receiverId" placeholder="Receiver ID (e.g. R001)">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+
+    <a href="index.html" class="back-link">← Back to Main Menu</a>
+</div>
+
+<script>
+    async function login() {
+        const receiverId = document.getElementById('receiverId').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const errorMsg = document.getElementById('errorMsg');
+
+        if (!receiverId || !password) {
+            errorMsg.innerText = "Please enter both ID and Password.";
+            errorMsg.style.display = "block";
+            return;
+        }
+
+        try {
+            // Calls the Javalin backend route we set up earlier
+            const response = await fetch('/api/receiver/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ receiverId, password })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                errorMsg.style.display = "none";
+                // Redirects to dashboard with their ID in the URL
+                window.location.href = `/receiver_dashboard.html?id=${receiverId}`;
+            } else {
+                errorMsg.innerText = result.message || "Invalid credentials.";
+                errorMsg.style.display = "block";
+            }
+        } catch (e) {
+            errorMsg.innerText = "Server error. Please check your connection.";
+            errorMsg.style.display = "block";
+        }
+    }
+</script>
+</body>
+</html>

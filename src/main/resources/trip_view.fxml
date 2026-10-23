@@ -32,6 +32,7 @@
             <Label text="  👨‍✈️    Drivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDrivers"/>
             <Label text="  🛣️    Trips" textFill="WHITE" prefWidth="220" prefHeight="45" style="-fx-background-color: #2563eb; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToTrips"/>
             <Label text="  🔧    Maintenance" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToMaintenance"/>
+            <Label text="  🚨    Incidents" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToIncidents"/>
             <Label text="  📈    Reports" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReports"/>
             <Label text="  ⚙️    Settings" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToSettings"/>
         </VBox>
@@ -62,6 +63,8 @@
                         style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 <Button fx:id="btnTabExpenses" text="Expenses" prefWidth="120" prefHeight="35" onAction="#showExpensesPane"
                         style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                <!-- NEW ROUTE TRACKING TAB -->
+                <Button fx:id="btnTabTracking" text="Route Tracking" prefWidth="130" prefHeight="35" onAction="#showTrackingPane" style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
             </HBox>
 
             <!-- ================= STACK PANE (VIEW SWITCHER) ================= -->
@@ -480,6 +483,87 @@
                             </columns>
                         </TableView>
                     </VBox>
+                </VBox>
+
+                <!-- 6. ROUTE TRACKING VIEW -->
+                <VBox fx:id="paneTracking" visible="false" spacing="15">
+                    <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);">
+                        <padding><Insets top="18" right="22" bottom="18" left="22"/></padding>
+                        <Label text="Live Route &amp; Checkpoint Setup" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #0f172a;"/>
+
+                        <GridPane hgap="20" vgap="12">
+                            <columnConstraints>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints minWidth="190"/>
+                                <ColumnConstraints minWidth="110"/>
+                                <ColumnConstraints minWidth="190"/>
+                            </columnConstraints>
+
+                            <Label text="Trip ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                            <HBox spacing="8" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                                <TextField fx:id="trackTripIdField" promptText="e.g. T001" prefWidth="110" style="-fx-background-radius: 6;"/>
+                                <Button text="🔍 View" onAction="#showAvailableTripsForTrackingPopup" prefWidth="72"
+                                        style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            </HBox>
+
+                            <Label text="Sequence No." style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                            <TextField fx:id="trackSequenceField" promptText="e.g. 1, 2, 3" style="-fx-background-radius: 6;" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                            <Label text="Location Name" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                            <TextField fx:id="trackLocationField" promptText="e.g. Kanchipuram Bypass" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                            <Label text="Expected Date" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                            <DatePicker fx:id="trackExpectedDatePicker" prefWidth="190" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                        </GridPane>
+
+                        <HBox spacing="10">
+                            <VBox.margin><Insets top="5"/></VBox.margin>
+                            <Button text="Add Checkpoint" prefHeight="33" prefWidth="125" onAction="#handleAddCheckpoint"
+                                    style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Delete" prefHeight="33" prefWidth="85" onAction="#handleDeleteCheckpoint"
+                                    style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            <Button text="Clear" prefHeight="33" prefWidth="85" onAction="#handleClearTrackingForm"
+                                    style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Bottom Section: Checkpoints Table & Live Map (Split View) -->
+                    <HBox spacing="15" VBox.vgrow="ALWAYS">
+
+                        <!-- LEFT SIDE: The Table -->
+                        <VBox spacing="10" HBox.hgrow="ALWAYS" prefWidth="500" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+                            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                            <HBox alignment="CENTER_LEFT" spacing="15">
+                                <Label text="Trip Route Checkpoints" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Button text="🔄 Refresh" onAction="#loadAllCheckpoints" prefHeight="28"
+                                        style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            </HBox>
+                            <TableView fx:id="trackingTable" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colTrackSeq" text="Seq" prefWidth="40"/>
+                                    <TableColumn fx:id="colTrackTripId" text="Trip ID" prefWidth="70"/>
+                                    <TableColumn fx:id="colTrackLocation" text="Location" prefWidth="150"/>
+                                    <TableColumn fx:id="colTrackExpected" text="Expected" prefWidth="120"/>
+                                    <TableColumn fx:id="colTrackActual" text="Actual" prefWidth="120"/>
+                                    <TableColumn fx:id="colTrackStatus" text="Status" prefWidth="80"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+
+                        <!-- RIGHT SIDE: The Live Map -->
+                        <VBox spacing="10" prefWidth="400" HBox.hgrow="NEVER" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+                            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                            <Label text="Live GPS Route" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+
+                            <!-- The WebView container that will load the Leaflet Map -->
+                            <StackPane VBox.vgrow="ALWAYS" style="-fx-border-color: #cbd5e1; -fx-border-radius: 6; -fx-background-radius: 6;">
+                                <?import javafx.scene.web.WebView?>
+                                <WebView fx:id="mapWebView" />
+                            </StackPane>
+                        </VBox>
+
+                    </HBox>
                 </VBox>
             </StackPane>
         </VBox>

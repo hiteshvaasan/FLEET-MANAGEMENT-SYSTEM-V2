@@ -28,11 +28,19 @@ public class DashboardController implements Initializable {
     @FXML private TableColumn<DashboardDAO.RecentTrip, String> colTripId, colVehicle, colDriver, colSource, colDestination, colDate, colStatus;
     @FXML private TableColumn<DashboardDAO.RecentTrip, Double> colDistance;
 
+
+    @FXML private TableView<IncidentAlert> tableActiveAlerts;
+    @FXML private TableColumn<IncidentAlert, String> colAlertTripId;
+    @FXML private TableColumn<IncidentAlert, String> colAlertType;
+    @FXML private TableColumn<IncidentAlert, String> colAlertTime;
+
     @FXML private javafx.scene.chart.PieChart vehiclePieChart;
 
     @FXML private Label lblFuelCost;
     @FXML private Label lblTollCost;
     @FXML private Label lblTotalExpense;
+
+
 
     private final DashboardDAO dashboardDAO = new DashboardDAO();
 
@@ -50,6 +58,11 @@ public class DashboardController implements Initializable {
         colDate.setCellValueFactory(new PropertyValueFactory<>("tripDate"));
         colDistance.setCellValueFactory(new PropertyValueFactory<>("distance"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+
+        colAlertTripId.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("tripId"));
+        colAlertType.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("type"));
+        colAlertTime.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("time"));
 
         colStatus.setCellFactory(column -> new TableCell<DashboardDAO.RecentTrip, String>() {
             @Override
@@ -81,6 +94,7 @@ public class DashboardController implements Initializable {
         });
 
         loadDashboardData();
+        loadActiveAlerts();
     }
 
     @FXML
@@ -98,6 +112,7 @@ public class DashboardController implements Initializable {
     private void handleRefresh() {
         loadDashboardData();
         showAlert(Alert.AlertType.INFORMATION, "Refreshed", "Dashboard data updated successfully.");
+        loadActiveAlerts();
     }
 
     private void loadDashboardData() {
@@ -190,6 +205,7 @@ public class DashboardController implements Initializable {
     @FXML private void switchToMaintenance() { loadScene("/maintenance_view.fxml", "Maintenance Management", 1050, 680); }
     @FXML private void switchToReports() { loadScene("/report_view.fxml", "Reports", 1050, 680); }
     @FXML private void switchToSettings() { loadScene("/settings_view.fxml", "Settings", 1050, 680); }
+    @FXML private void switchToIncidents() { loadScene("/incident_view.fxml", "Incident Management",1050, 680); }
 
     private void loadScene(String fxmlPath, String title, double width, double height) {
         try {
@@ -203,19 +219,62 @@ public class DashboardController implements Initializable {
                 ((BorderPane) root).setStyle("-fx-background-color: #0f172a;");
             }
 
-            stage.setScene(new Scene(root, width, height));
+            // ✅ FIX: Swap the root of the current scene instead of creating a new one
+            if (stage.getScene() != null) {
+                stage.getScene().setRoot(root);
+            } else {
+                stage.setScene(new Scene(root, width, height));
+            }
+
             stage.setTitle("Fleet Management System V2 - " + title);
-            stage.show();
+
+            // Removed stage.show() to prevent the OS window from flashing
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
     private void showAlert(Alert.AlertType type, String title, String msg) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    public static class IncidentAlert {
+        private final javafx.beans.property.SimpleStringProperty tripId;
+        private final javafx.beans.property.SimpleStringProperty type;
+        private final javafx.beans.property.SimpleStringProperty time;
+
+        public IncidentAlert(String tripId, String type, String time) {
+            this.tripId = new javafx.beans.property.SimpleStringProperty(tripId);
+            this.type = new javafx.beans.property.SimpleStringProperty(type);
+            this.time = new javafx.beans.property.SimpleStringProperty(time);
+        }
+        public String getTripId() { return tripId.get(); }
+        public String getType() { return type.get(); }
+        public String getTime() { return time.get(); }
+    }
+
+    private void loadActiveAlerts() {
+        javafx.collections.ObservableList<IncidentAlert> activeAlertsList = javafx.collections.FXCollections.observableArrayList();
+        String alertQuery = "SELECT trip_id, incident_type, TIME(reported_at) as alert_time FROM incidents WHERE status = 'Open' ORDER BY reported_at DESC";
+
+        try (java.sql.Connection conn = com.fleetmanagement.db.DatabaseConnection.getInstance().getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(alertQuery);
+             java.sql.ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                activeAlertsList.add(new IncidentAlert(
+                        rs.getString("trip_id"),
+                        rs.getString("incident_type"),
+                        rs.getString("alert_time")
+                ));
+            }
+            tableActiveAlerts.setItems(activeAlertsList);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

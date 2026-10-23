@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receiver Dashboard - Fleet Management</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+        }
+        /* Top Navigation Bar */
+        .navbar {
+            background-color: #0f172a;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .navbar h2 { margin: 0; font-size: 20px; }
+        .logout-btn {
+            background: #ef4444; color: white; border: none;
+            padding: 8px 16px; border-radius: 6px; font-weight: bold;
+            cursor: pointer; transition: 0.2s;
+        }
+        .logout-btn:hover { background: #dc2626; }
+
+        /* Main Content Container */
+        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
+        .greeting { color: #0f172a; margin-bottom: 20px; }
+
+        /* Shipment Cards */
+        .card {
+            background: white; padding: 20px; border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px;
+            border-left: 5px solid #2563eb;
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .trip-id { font-size: 18px; font-weight: bold; color: #0f172a; margin: 0; }
+
+        /* Status Badges */
+        .status { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .status.completed { background: #d1fae5; color: #065f46; }
+        .status.in-progress { background: #dbeafe; color: #1e40af; }
+        .status.pending { background: #fef3c7; color: #92400e; }
+
+        .route-info { color: #475569; margin: 5px 0; font-size: 15px; font-weight: 500;}
+        .date-info { color: #64748b; font-size: 14px; margin-bottom: 15px; }
+
+        /* Action Buttons */
+        .action-row { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-track {
+            flex: 1; text-align: center; background: #2563eb; color: white;
+            padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold;
+            transition: 0.2s;
+        }
+        .btn-track:hover { background: #1d4ed8; }
+
+        .btn-feedback {
+            flex: 1; text-align: center; background: #10b981; color: white;
+            padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold;
+        }
+
+        .empty-state { text-align: center; color: #64748b; padding: 40px; background: white; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <h2>🎁 Client Portal</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="container">
+    <h2 class="greeting" id="greetingText">Loading your shipments...</h2>
+    <div id="shipmentList"></div>
+</div>
+
+<script>
+    // 1. Extract the receiver ID from the URL (e.g., ?id=R001)
+    const urlParams = new URLSearchParams(window.location.search);
+    const receiverId = urlParams.get('id');
+
+    if (!receiverId) {
+        alert("Unauthorized access. Redirecting to login.");
+        window.location.href = "/receiver_login.html";
+    } else {
+        document.getElementById('greetingText').innerText = `Welcome back, Client ${receiverId} 👋`;
+        loadShipments();
+    }
+
+    // 2. Fetch shipments from the Javalin backend
+    async function loadShipments() {
+        try {
+            const response = await fetch(`/api/receiver/shipments?id=${receiverId}`);
+            const result = await response.json();
+
+            const list = document.getElementById('shipmentList');
+            list.innerHTML = '';
+
+            if (result.success && result.data.length > 0) {
+                result.data.forEach(trip => {
+                    // Format the status for CSS styling
+                    let statusClass = trip.status.toLowerCase().replace(' ', '-');
+                    if(!['completed', 'in-progress'].includes(statusClass)) statusClass = 'pending';
+
+                    // Build the card HTML
+                    const card = document.createElement('div');
+                    card.className = 'card';
+
+                    // If completed, show feedback button instead of track button
+                    let buttonsHtml = '';
+                    if (statusClass === 'completed') {
+                        buttonsHtml = `<a href="/receiver_feedback.html?tripId=${trip.tripId}" class="btn-feedback">⭐ Submit Feedback</a>`;
+                    } else {
+                        buttonsHtml = `<a href="/receiver_tracking.html?tripId=${trip.tripId}" class="btn-track">🔍 Track Live Route</a>`;
+                    }
+
+                    card.innerHTML = `
+                            <div class="card-header">
+                                <h3 class="trip-id">Trip ID: ${trip.tripId}</h3>
+                                <span class="status ${statusClass}">${trip.status}</span>
+                            </div>
+                            <p class="route-info">📍 ${trip.source} ➔ ${trip.destination}</p>
+                            <p class="date-info">📅 Expected Delivery: ${trip.expectedDate || 'TBD'}</p>
+                            <div class="action-row">
+                                ${buttonsHtml}
+                            </div>
+                        `;
+                    list.appendChild(card);
+                });
+            } else {
+                list.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No Shipments Found</h3>
+                            <p>You don't have any active or past shipments assigned to your account.</p>
+                        </div>
+                    `;
+            }
+        } catch (e) {
+            document.getElementById('shipmentList').innerHTML = '<p style="color: red; text-align:center;">Error loading shipments from server.</p>';
+        }
+    }
+
+    // 3. Logout function
+    function logout() {
+        window.location.href = "/index.html";
+    }
+</script>
+</body>
+</html>

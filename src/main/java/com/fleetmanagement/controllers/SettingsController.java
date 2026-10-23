@@ -135,6 +135,7 @@ public class SettingsController implements Initializable {
     @FXML private void switchToMaintenance() { loadScene("/maintenance_view.fxml", "Maintenance Management"); }
     @FXML private void switchToReports() { loadScene("/report_view.fxml", "Reports"); }
     @FXML private void switchToSettings() { loadScene("/settings_view.fxml", "Settings"); }
+    @FXML private void switchToIncidents() { loadScene("/incident_view.fxml", "Incident Management"); }
 
     private void loadScene(String fxmlPath, String title) {
         try {
@@ -144,9 +145,20 @@ public class SettingsController implements Initializable {
             Stage stage = (Stage) rootPane.getScene().getWindow();
             FXMLLoader loader = new FXMLLoader(fileUrl);
             Parent root = loader.load();
-            stage.setScene(new Scene(root, 1050, 680));
+
+            if (ThemeManager.isDarkMode() && root instanceof BorderPane) {
+                ((BorderPane) root).setStyle("-fx-background-color: #0f172a;");
+            }
+
+            // Swap the root smoothly without destroying the window
+            if (stage.getScene() != null) {
+                stage.getScene().setRoot(root);
+            } else {
+                stage.setScene(new Scene(root, 1050, 680));
+            }
+
             stage.setTitle("Fleet Management System V2 - " + title);
-            stage.show();
+
         } catch (Exception e) {
             e.printStackTrace();
         }

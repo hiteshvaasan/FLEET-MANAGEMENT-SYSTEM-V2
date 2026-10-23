@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Tracking - Fleet Management</title>
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; margin: 0; padding: 0; }
+        .navbar { background-color: #0f172a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; }
+        .back-btn { color: #38bdf8; text-decoration: none; font-weight: bold; }
+        .container { max-width: 900px; margin: 20px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h3 { margin-top: 0; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+
+        /* Map Container */
+        #map { height: 350px; border-radius: 8px; width: 100%; background: #e2e8f0; }
+
+        /* Timeline Styles */
+        .timeline { list-style: none; padding: 0; margin: 0; border-left: 3px solid #cbd5e1; margin-left: 10px; }
+        .timeline li { padding-left: 20px; position: relative; margin-bottom: 20px; }
+        .timeline li::before {
+            content: ''; position: absolute; left: -10px; top: 0; width: 16px; height: 16px;
+            border-radius: 50%; background: #cbd5e1; border: 3px solid white;
+        }
+        .timeline li.reached::before { background: #10b981; }
+        .timeline li.pending::before { background: #f59e0b; }
+        .time-label { display: block; font-size: 12px; color: #64748b; margin-top: 4px; }
+
+        /* Driver Info */
+        .driver-info p { margin: 8px 0; color: #475569; font-weight: 500; }
+        .driver-info span { color: #0f172a; font-weight: bold; float: right; }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="javascript:history.back()" class="back-btn">← Back to Dashboard</a>
+    <h2 style="margin: 0; font-size: 18px;">Live Tracking</h2>
+</div>
+
+<div class="container">
+    <!-- Left Column: Map and Driver Info -->
+    <div>
+        <div class="card" style="margin-bottom: 20px;">
+            <h3>📍 Live Location Route</h3>
+            <div id="map"></div>
+        </div>
+
+        <div class="card driver-info">
+            <h3>🚚 Driver & Vehicle Details</h3>
+            <p>Driver Name: <span id="driverName">Loading...</span></p>
+            <p>Vehicle: <span id="vehicleInfo">Loading...</span></p>
+            <p>Trip Status: <span id="tripStatus">Loading...</span></p>
+        </div>
+    </div>
+
+    <!-- Right Column: Checkpoint Timeline -->
+    <div class="card">
+        <h3>⏳ Delivery Milestones</h3>
+        <ul class="timeline" id="timelineList">
+            <li class="pending">Loading checkpoints...</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const tripId = urlParams.get('tripId');
+
+    // Initialize Leaflet Map (Centered on India by default)
+    const map = L.map('map').setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    async function loadTrackingData() {
+        if (!tripId) return alert("No Trip ID provided.");
+
+        try {
+            const response = await fetch(`/api/receiver/track?tripId=${tripId}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const data = result.data;
+
+                document.getElementById('driverName').innerText = data.driverName;
+                document.getElementById('vehicleInfo').innerText = data.vehicleInfo;
+                document.getElementById('tripStatus').innerText = data.status;
+
+                // Build Timeline
+                const timelineList = document.getElementById('timelineList');
+                timelineList.innerHTML = '';
+
+                if (data.checkpoints && data.checkpoints.length > 0) {
+                    data.checkpoints.forEach(cp => {
+                        const li = document.createElement('li');
+                        // If status is Reached/Completed, color it green
+                        li.className = cp.status.toLowerCase() === 'pending' ? 'pending' : 'reached';
+                        li.innerHTML = `
+                                <strong>${cp.location}</strong>
+                                <span class="time-label">${cp.status} • ${cp.time || 'Awaiting update'}</span>
+                            `;
+                        timelineList.appendChild(li);
+                    });
+                } else {
+                    timelineList.innerHTML = '<li class="pending">No checkpoints recorded yet.</li>';
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching tracking data:", error);
+        }
+    }
+
+    loadTrackingData();
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Shipment</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f8fafc; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        input, button { padding: 10px; margin-top: 10px; width: 100%; box-sizing: border-box; }
+        button { background-color: #f59e0b; color: white; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        #result { margin-top: 20px; font-weight: bold; color: #1e3a8a; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>📦 Track Your Shipment</h2>
+    <input type="text" id="tripIdInput" placeholder="Enter Trip ID (e.g., T001)">
+    <button onclick="trackTrip()">Track</button>
+    <div id="result"></div>
+</div>
+
+<script>
+    async function trackTrip() {
+        const tripId = document.getElementById("tripIdInput").value;
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = "Searching...";
+
+        try {
+            // This calls the Javalin route you made in Main.java
+            const response = await fetch(`/api/track/${tripId}`);
+
+            if (response.ok) {
+                const trip = await response.json();
+                resultDiv.innerHTML = `
+                        <p><strong>Status:</strong> ${trip.status}</p>
+                        <p><strong>From:</strong> ${trip.source}</p>
+                        <p><strong>To:</strong> ${trip.destination}</p>
+                    `;
+            } else {
+                resultDiv.innerHTML = "<span style='color:red;'>Trip not found.</span>";
+            }
+        } catch (error) {
+            resultDiv.innerHTML = "Error connecting to server.";
+        }
+    }
+</script>
+</body>
+</html>

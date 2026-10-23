@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="rootPane" stylesheets="@portal_style.css" styleClass="main-container" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.fleetmanagement.controllers.MainPortalController">
+
+    <!-- HERO HEADER BANNER -->
+    <top>
+        <VBox styleClass="hero-banner">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <HBox alignment="CENTER_LEFT" spacing="15" HBox.hgrow="ALWAYS">
+                    <StackPane styleClass="header-icon-container">
+                        <Label text="🚛" styleClass="header-icon"/>
+                    </StackPane>
+                    <VBox alignment="CENTER_LEFT" spacing="2">
+                        <Label text="FLEET MANAGEMENT SYSTEM" styleClass="header-title"/>
+                        <Label text="Track  •  Manage  •  Deliver" styleClass="header-subtitle"/>
+                    </VBox>
+                </HBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- CENTER PORTAL WIDGETS -->
+    <center>
+        <VBox alignment="CENTER" spacing="15" styleClass="center-container">
+            <VBox alignment="CENTER" spacing="4">
+                <Label text="Welcome to Fleet Management System" styleClass="welcome-title"/>
+                <Label text="Select your portal to continue" styleClass="welcome-subtitle"/>
+            </VBox>
+
+            <HBox alignment="CENTER" spacing="30" styleClass="cards-container">
+
+                <!-- ADMIN CARD WIDGET -->
+                <VBox alignment="TOP_CENTER" spacing="12" styleClass="portal-card, card-admin">
+                    <StackPane styleClass="icon-circle, icon-circle-admin">
+                        <Label text="🖥️" styleClass="card-icon"/>
+                    </StackPane>
+
+                    <Label text="Admin" styleClass="card-title, title-admin"/>
+                    <Label text="Manage vehicles, drivers, trips, maintenance and reports." styleClass="card-description" wrapText="true" textAlignment="CENTER"/>
+
+                    <Button text="➜  Login" onAction="#handleAdminLoginClick" styleClass="card-btn, btn-admin"/>
+
+                    <Region VBox.vgrow="ALWAYS"/>
+                    <Label text="Desktop Application" styleClass="role-badge, badge-admin"/>
+                </VBox>
+
+                <!-- DRIVER CARD WIDGET -->
+                <VBox alignment="TOP_CENTER" spacing="12" styleClass="portal-card, card-driver">
+                    <StackPane styleClass="icon-circle, icon-circle-driver">
+                        <Label text="🚚" styleClass="card-icon"/>
+                    </StackPane>
+
+                    <Label text="Driver" styleClass="card-title, title-driver"/>
+                    <Label text="View assigned trips, update checkpoints and report issues." styleClass="card-description" wrapText="true" textAlignment="CENTER"/>
+
+                    <Button text="➜  Login" onAction="#handleDriverLoginClick" styleClass="card-btn, btn-driver"/>
+                    <Button text="📱 Driver QR Portal" onAction="#showDriverQrCodePopup"
+                            style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                    <Region VBox.vgrow="ALWAYS"/>
+                    <Label text="In-Vehicle / Mobile" styleClass="role-badge, badge-driver"/>
+                </VBox>
+
+                <!-- RECEIVER CARD WIDGET -->
+                <VBox alignment="TOP_CENTER" spacing="12" styleClass="portal-card, card-receiver">
+                    <StackPane styleClass="icon-circle, icon-circle-receiver">
+                        <Label text="📦" styleClass="card-icon"/>
+                    </StackPane>
+
+                    <Label text="Receiver" styleClass="card-title, title-receiver"/>
+                    <Label text="Track your shipment and view delivery status." styleClass="card-description" wrapText="true" textAlignment="CENTER"/>
+
+                    <Button text="➜  Login" onAction="#handleReceiverTrackingClick" styleClass="card-btn, btn-receiver"/>
+                    <Button text="📱 Receiver QR Portal" onAction="#showReceiverQrCodePopup"
+                            style="-fx-background-color: #d97706; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+
+                    <Region VBox.vgrow="ALWAYS"/>
+                    <Label text="Web Portal" styleClass="role-badge, badge-receiver"/>
+                </VBox>
+
+            </HBox>
+        </VBox>
+    </center>
+
+    <!-- FOOTER BAR -->
+    <bottom>
+        <HBox alignment="CENTER" styleClass="footer-bar">
+            <Label text="© 2026 Fleet Management System  |  VIT BCA Project" styleClass="footer-text"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

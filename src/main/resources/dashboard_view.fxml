@@ -80,6 +80,7 @@
             <Label text="  👨‍✈️    Drivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDrivers"/>
             <Label text="  🛣️    Trips" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToTrips"/>
             <Label text="  🔧    Maintenance" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToMaintenance"/>
+            <Label text="  🚨    Incidents" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToIncidents"/>
             <Label text="  📈    Reports" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReports"/>
             <Label text="  ⚙️    Settings" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToSettings"/>
         </VBox>
@@ -90,12 +91,21 @@
         <VBox spacing="20">
             <padding><Insets top="20" right="25" bottom="20" left="25"/></padding>
 
+            <!-- HEADER ROW WITH ADMIN AVATAR MENU -->
             <HBox alignment="CENTER_LEFT" spacing="15">
                 <Button fx:id="btnHamburger" text="☰" onAction="#toggleSidebar" visible="false" managed="false" prefHeight="35" prefWidth="40" style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-size: 18px; -fx-cursor: hand;"/>
                 <Label text="Dashboard Overview" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="🔄 Refresh" onAction="#handleRefresh" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
-            </HBox>
+
+                <!-- TOP RIGHT: ADMIN AVATAR DROPDOWN MENU -->
+                <MenuButton text="👨‍💼 Admin" style="-fx-background-color: white; -fx-border-color: #cbd5e1; -fx-border-radius: 20px; -fx-text-fill: #0f172a; -fx-font-weight: bold; -fx-font-size: 13px; -fx-background-radius: 20px; -fx-padding: 4 12; -fx-cursor: hand;">
+                    <items>
+                        <MenuItem text="🔄 Refresh Data" onAction="#handleRefresh"/>
+                        <MenuItem text="⚙️ Settings" onAction="#switchToSettings"/>
+                        <SeparatorMenuItem/>
+                        <MenuItem text="🚪 Logout" onAction="#handleFileLogout"/>
+                    </items>
+                </MenuButton>            </HBox>
 
             <!-- KPI CARDS GRID -->
             <GridPane hgap="15" vgap="15">
@@ -172,27 +182,39 @@
                 </VBox>
             </GridPane>
 
-            <!-- DATA SECTION: PIE CHART & RECENT TRIPS -->
+            <!-- DATA SECTION: PIE CHART, RECENT TRIPS & ACTIVE ALERTS -->
             <HBox spacing="15" VBox.vgrow="ALWAYS">
                 <!-- VEHICLE STATUS PIE CHART -->
-                <VBox spacing="10" prefWidth="320" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+                <VBox spacing="10" prefWidth="280" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
                     <Label text="Vehicle Status Breakdown" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                     <PieChart fx:id="vehiclePieChart" legendSide="BOTTOM" VBox.vgrow="ALWAYS" prefHeight="320" minHeight="280"/>
                 </VBox>
 
-                <!-- RECENT TRIPS TABLE -->
+                <!-- RECENT TRIPS TABLE (Tightened to remove blank space) -->
                 <VBox spacing="10" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
                     <Label text="Recent Trips" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                     <TableView fx:id="tableRecentTrips" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn fx:id="colTripId" text="Trip ID" prefWidth="80"/>
-                            <TableColumn fx:id="colVehicle" text="Vehicle" prefWidth="80"/>
-                            <TableColumn fx:id="colDriver" text="Driver" prefWidth="80"/>
-                            <TableColumn fx:id="colSource" text="Source" prefWidth="100"/>
-                            <TableColumn fx:id="colDestination" text="Destination" prefWidth="100"/>
-                            <TableColumn fx:id="colDate" text="Trip Date" prefWidth="90"/>
-                            <TableColumn fx:id="colDistance" text="Distance" prefWidth="75"/>
-                            <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
+                            <TableColumn fx:id="colTripId" text="Trip ID" prefWidth="65"/>
+                            <TableColumn fx:id="colVehicle" text="Vehicle" prefWidth="65"/>
+                            <TableColumn fx:id="colDriver" text="Driver" prefWidth="65"/>
+                            <TableColumn fx:id="colSource" text="Source" prefWidth="90"/>
+                            <TableColumn fx:id="colDestination" text="Destination" prefWidth="90"/>
+                            <TableColumn fx:id="colDate" text="Trip Date" prefWidth="85"/>
+                            <TableColumn fx:id="colDistance" text="Distance" prefWidth="65"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="85"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+
+                <!-- NEW: ACTIVE ALERTS TABLE -->
+                <VBox spacing="10" prefWidth="300" style="-fx-background-color: #fff1f2; -fx-border-color: #f43f5e; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(244,63,94,0.15), 5, 0, 0, 2);">
+                    <Label text="🚨 Active Alerts" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #e11d48;"/>
+                    <TableView fx:id="tableActiveAlerts" VBox.vgrow="ALWAYS" style="-fx-background-color: white;">
+                        <columns>
+                            <TableColumn fx:id="colAlertTripId" text="Trip" prefWidth="65"/>
+                            <TableColumn fx:id="colAlertType" text="Incident Type" prefWidth="125"/>
+                            <TableColumn fx:id="colAlertTime" text="Time" prefWidth="75"/>
                         </columns>
                     </TableView>
                 </VBox>

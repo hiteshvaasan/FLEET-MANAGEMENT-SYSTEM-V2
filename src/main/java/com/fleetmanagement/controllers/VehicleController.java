@@ -247,6 +247,7 @@ public class VehicleController implements Initializable {
     @FXML private void switchToMaintenance() { loadScene("/maintenance_view.fxml", "Maintenance Management"); }
     @FXML private void switchToReports() { loadScene("/report_view.fxml", "Reports"); }
     @FXML private void switchToSettings() { loadScene("/settings_view.fxml", "Settings"); }
+    @FXML private void switchToIncidents() { loadScene("/incident_view.fxml", "Incident Management"); }
 
     private void loadScene(String fxmlPath, String title) {
         try {

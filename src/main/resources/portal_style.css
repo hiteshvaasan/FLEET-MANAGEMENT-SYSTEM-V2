@@ -1,0 +1,180 @@
+.main-container {
+    -fx-background-color: #f8fafc;
+}
+
+/* HERO HEADER BANNER */
+.hero-banner {
+    -fx-background-color: linear-gradient(to right, #0f2b5c, #1e40af, #2563eb);
+    -fx-padding: 22px 40px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 10, 0, 0, 4);
+}
+
+.header-icon-container {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-background-radius: 12px;
+    -fx-padding: 8px 12px;
+}
+
+.header-icon {
+    -fx-font-size: 28px;
+}
+
+.header-title {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 1px;
+}
+
+.header-subtitle {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+}
+
+/* CENTER AREA & WELCOME TEXT */
+.center-container {
+    -fx-padding: 25px 20px;
+}
+
+.welcome-title {
+    -fx-text-fill: #0f2b5c;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.welcome-subtitle {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 14px;
+}
+
+/* CARD WIDGETS */
+.cards-container {
+    -fx-padding: 15px 0 0 0;
+}
+
+.portal-card {
+    -fx-background-color: white;
+    -fx-pref-width: 300px;
+    -fx-max-width: 300px;
+    -fx-pref-height: 380px;
+    -fx-max-height: 380px;
+    -fx-padding: 25px 20px 20px 20px;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.06), 15, 0, 0, 6);
+}
+
+.card-admin {
+    -fx-border-color: #3b82f6;
+}
+
+.card-driver {
+    -fx-border-color: #10b981;
+}
+
+.card-receiver {
+    -fx-border-color: #f59e0b;
+}
+
+/* CIRCLE ICON BADGES */
+.icon-circle {
+    -fx-min-width: 70px;
+    -fx-min-height: 70px;
+    -fx-max-width: 70px;
+    -fx-max-height: 70px;
+    -fx-background-radius: 50%;
+}
+
+.icon-circle-admin {
+    -fx-background-color: #dbeafe;
+}
+
+.icon-circle-driver {
+    -fx-background-color: #d1fae5;
+}
+
+.icon-circle-receiver {
+    -fx-background-color: #fef3c7;
+}
+
+.card-icon {
+    -fx-font-size: 32px;
+}
+
+/* TITLES & DESCRIPTIONS */
+.card-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.title-admin { -fx-text-fill: #1d4ed8; }
+.title-driver { -fx-text-fill: #047857; }
+.title-receiver { -fx-text-fill: #d97706; }
+
+.card-description {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+    -fx-line-spacing: 2px;
+}
+
+/* BUTTONS */
+.card-btn {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-pref-width: 220px;
+    -fx-padding: 10px 0;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.btn-admin {
+    -fx-background-color: #2563eb;
+}
+.btn-admin:hover { -fx-background-color: #1d4ed8; }
+
+.btn-driver {
+    -fx-background-color: #059669;
+}
+.btn-driver:hover { -fx-background-color: #047857; }
+
+.btn-receiver {
+    -fx-background-color: #d97706;
+}
+.btn-receiver:hover { -fx-background-color: #b45309; }
+
+/* ROLE BADGES AT BOTTOM OF CARDS */
+.role-badge {
+    -fx-padding: 5px 15px;
+    -fx-background-radius: 20px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.badge-admin {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #2563eb;
+}
+
+.badge-driver {
+    -fx-background-color: #ecfdf5;
+    -fx-text-fill: #059669;
+}
+
+.badge-receiver {
+    -fx-background-color: #fffbeb;
+    -fx-text-fill: #d97706;
+}
+
+/* FOOTER */
+.footer-bar {
+    -fx-background-color: #0f172a;
+    -fx-padding: 12px;
+}
+
+.footer-text {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 12px;
+}

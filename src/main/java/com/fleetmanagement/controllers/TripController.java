@@ -1,5 +1,6 @@
 package com.fleetmanagement.controllers;
 
+import com.fleetmanagement.db.DatabaseConnection;
 import com.fleetmanagement.dao.TripDAO;
 import com.fleetmanagement.dao.CargoDAO;
 import com.fleetmanagement.dao.FuelDAO;
@@ -27,8 +28,29 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import javafx.scene.web.WebView;
+import javafx.scene.web.WebEngine;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+
+import com.fleetmanagement.model.Checkpoint;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import java.sql.ResultSet;
+
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import java.util.Optional;
+
 public class TripController implements Initializable {
 
+
+    @FXML private WebView mapWebView;
     // ===== MAIN FORM FIELDS =====
     @FXML private TextField tripIdField, vehicleIdField, driverIdField, reqCapacityField;
     @FXML private TextField sourceField, destinationField, distanceField;
@@ -92,6 +114,16 @@ public class TripController implements Initializable {
     @FXML private TableColumn<Expense, Double> colExpAmount;
     @FXML private TableColumn<Expense, LocalDate> colExpDate;
 
+
+    @FXML private TableView<Checkpoint> trackingTable;
+    @FXML private TableColumn<Checkpoint, Integer> colTrackSeq;
+    @FXML private TableColumn<Checkpoint, String> colTrackLocation;
+    @FXML private TableColumn<Checkpoint, String> colTrackExpected;
+    @FXML private TableColumn<Checkpoint, String> colTrackActual;
+    @FXML private TableColumn<Checkpoint, String> colTrackStatus;
+
+    @FXML private TableColumn<Checkpoint, String> colTrackTripId;
+
     private final TripDAO tripDAO = new TripDAO();
     private final ObservableList<Trip> tripList = FXCollections.observableArrayList();
     private FilteredList<Trip> filteredTripList;
@@ -127,7 +159,28 @@ public class TripController implements Initializable {
         colDestination.setCellValueFactory(new PropertyValueFactory<>("destination"));
         colDate.setCellValueFactory(new PropertyValueFactory<>("tripDate"));
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        // 1. Link Table Columns to Checkpoint Model properties
+        colTrackSeq.setCellValueFactory(new PropertyValueFactory<>("sequence"));
+        colTrackLocation.setCellValueFactory(new PropertyValueFactory<>("location"));
+        colTrackExpected.setCellValueFactory(new PropertyValueFactory<>("expectedTime"));
+        colTrackActual.setCellValueFactory(new PropertyValueFactory<>("actualTime"));
+        colTrackStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        // Add this right under colTrackSeq...
+        colTrackSeq.setCellValueFactory(new PropertyValueFactory<>("sequence"));
+        colTrackTripId.setCellValueFactory(new PropertyValueFactory<>("tripId")); // <-- NEW LINE
+        colTrackLocation.setCellValueFactory(new PropertyValueFactory<>("location"));
+        // ... rest of your columns
+        // 2. Load the map
+        setupLiveMap();
+
+        // 3. Load the table data
+        loadAllCheckpoints();
+
         colTotalCost.setCellValueFactory(cellData ->
+
+
+
                 new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getTotalTripCost()));
 
         filteredTripList = new FilteredList<>(tripList, t -> true);
@@ -206,6 +259,23 @@ public class TripController implements Initializable {
         setupTollRowSelection();
         loadExpenseData();
         setupExpenseRowSelection();
+    }
+
+    private void setActiveTabButton(Button activeButton) {
+        // 1. Define the default (gray) and active (blue) styles
+        String defaultStyle = "-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;";
+        String activeStyle = "-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;";
+
+        // 2. Reset ALL buttons to gray
+        btnTabTrip.setStyle(defaultStyle);
+        btnTabCargo.setStyle(defaultStyle);
+        btnTabFuel.setStyle(defaultStyle);
+        btnTabToll.setStyle(defaultStyle);
+        btnTabExpenses.setStyle(defaultStyle);
+        btnTabTracking.setStyle(defaultStyle);
+
+        // 3. Set the specifically clicked button to blue
+        activeButton.setStyle(activeStyle);
     }
 
     private void setupDistanceCalculator() {
@@ -1361,34 +1431,82 @@ public class TripController implements Initializable {
     }
 
     // ================= PANE SWITCHING LOGIC =================
-    @FXML private void showTripPane() { switchPanes(paneTripDetails, btnTabTrip, "Trip Management - Trip Details"); }
-    @FXML private void showCargoPane() { switchPanes(paneCargo, btnTabCargo, "Trip Management - Cargo / Goods"); }
+    @FXML private void showTripPane() {
+        switchPanes(paneTripDetails, btnTabTrip, "Trip Management - Trip Details");
+    }
+    @FXML private void showCargoPane() {
+        switchPanes(paneCargo, btnTabCargo, "Trip Management - Cargo / Goods");
+    }
     @FXML private void showFuelPane() {
         switchPanes(paneFuel, btnTabFuel, "Trip Management - Fuel");
-        loadFuelData();
+        // loadFuelData(); // Uncomment if you have this method
     }
     @FXML private void showTollPane() {
         switchPanes(paneToll, btnTabToll, "Trip Management - Toll");
-        loadTollData();
+        // loadTollData(); // Uncomment if you have this method
     }
     @FXML private void showExpensesPane() {
         switchPanes(paneExpenses, btnTabExpenses, "Trip Management - Expenses");
-        loadExpenseData();
+        // loadExpenseData(); // Uncomment if you have this method
+    }
+    @FXML private void showTrackingPane() {
+        switchPanes(paneTracking, btnTabTracking, "Trip Management - Route Tracking");
     }
 
     private void switchPanes(VBox activePane, Button activeButton, String headerText) {
-        paneTripDetails.setVisible(false); paneCargo.setVisible(false); paneFuel.setVisible(false);
-        paneToll.setVisible(false); paneExpenses.setVisible(false);
+        // 1. Hide ALL panes
+        paneTripDetails.setVisible(false);
+        paneCargo.setVisible(false);
+        paneFuel.setVisible(false);
+        paneToll.setVisible(false);
+        paneExpenses.setVisible(false);
+        paneTracking.setVisible(false); // Added Tracking
 
+        // 2. Reset ALL buttons to gray
         String inactiveStyle = "-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;";
-        btnTabTrip.setStyle(inactiveStyle); btnTabCargo.setStyle(inactiveStyle); btnTabFuel.setStyle(inactiveStyle);
-        btnTabToll.setStyle(inactiveStyle); btnTabExpenses.setStyle(inactiveStyle);
+        btnTabTrip.setStyle(inactiveStyle);
+        btnTabCargo.setStyle(inactiveStyle);
+        btnTabFuel.setStyle(inactiveStyle);
+        btnTabToll.setStyle(inactiveStyle);
+        btnTabExpenses.setStyle(inactiveStyle);
+        btnTabTracking.setStyle(inactiveStyle); // Added Tracking
 
+        // 3. Set the active pane, active button to blue, and update title
         activePane.setVisible(true);
         activeButton.setStyle("-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;");
         headerLabel.setText(headerText);
     }
 
+    private void setupLiveMap() {
+        javafx.application.Platform.runLater(() -> {
+            WebEngine webEngine = mapWebView.getEngine();
+            webEngine.setJavaScriptEnabled(true);
+
+            String mapHTML = "<!DOCTYPE html><html><head>"
+                    + "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                    + "<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css' />"
+                    + "<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>"
+                    + "<style>"
+                    + "  html, body { height: 100%; margin: 0; padding: 0; background-color: #f1f5f9; } "
+                    + "  /* Absolute positioning forces the map to strictly fit the JavaFX container */ "
+                    + "  #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; } "
+                    + "</style>"
+                    + "</head><body>"
+                    + "<div id='map'></div>"
+                    + "<script>"
+                    + "  var map = L.map('map').setView([12.9165, 79.1325], 10); " // Centered on Vellore
+                    + "  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { "
+                    + "      maxZoom: 19, "
+                    + "      attribution: '© OpenStreetMap' "
+                    + "  }).addTo(map);"
+                    + "  "
+                    + "  // The Magic Fix: Forces Leaflet to fetch the missing grey tiles after 300ms "
+                    + "  setTimeout(function() { map.invalidateSize(); }, 300);"
+                    + "</script></body></html>";
+
+            webEngine.loadContent(mapHTML);
+        });
+    }
     // ================= SIDEBAR & NAVIGATION =================
 
     @FXML
@@ -1409,6 +1527,19 @@ public class TripController implements Initializable {
     @FXML private void switchToMaintenance() { loadScene("/maintenance_view.fxml", "Maintenance Management"); }
     @FXML private void switchToReports() { loadScene("/report_view.fxml", "Reports"); }
     @FXML private void switchToSettings() { loadScene("/settings_view.fxml", "Settings"); }
+    @FXML private void switchToIncidents() { loadScene("/incident_view.fxml", "Incident Management"); }
+
+
+    // --- ROUTE TRACKING TAB ---
+    @FXML private Button btnTabTracking;
+    @FXML private VBox paneTracking;
+
+    @FXML private TextField trackTripIdField;
+    @FXML private TextField trackSequenceField;
+    @FXML private TextField trackLocationField;
+    @FXML private DatePicker trackExpectedDatePicker;
+
+
 
     private void loadScene(String fxmlPath, String title) {
         try {
@@ -1425,6 +1556,179 @@ public class TripController implements Initializable {
         Alert alert = new Alert(type);
         alert.setTitle(title); alert.setHeaderText(null); alert.setContentText(msg); alert.showAndWait();
     }
+
+
+
+
+    // --- ROUTE TRACKING ACTION HANDLERS ---
+
+    @FXML
+    private void showAvailableTripsForTrackingPopup() {
+        // 1. Create the Dialog
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Select Trip for Tracking");
+        dialog.setHeaderText("Available Trips (Scheduled / In Progress)");
+
+        // 2. Set the buttons (Select and Cancel)
+        ButtonType selectButtonType = new ButtonType("Select", ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(selectButtonType, ButtonType.CANCEL);
+
+        // 3. Create the TableView for the Popup
+        TableView<TrackingTripModel> table = new TableView<>();
+        table.setPrefWidth(500);
+        table.setPrefHeight(250);
+
+        TableColumn<TrackingTripModel, String> colId = new TableColumn<>("Trip ID");
+        colId.setCellValueFactory(new PropertyValueFactory<>("tripId"));
+
+        TableColumn<TrackingTripModel, String> colVeh = new TableColumn<>("Vehicle");
+        colVeh.setCellValueFactory(new PropertyValueFactory<>("vehicleId"));
+
+        TableColumn<TrackingTripModel, String> colSrc = new TableColumn<>("Source");
+        colSrc.setCellValueFactory(new PropertyValueFactory<>("source"));
+
+        TableColumn<TrackingTripModel, String> colDest = new TableColumn<>("Destination");
+        colDest.setCellValueFactory(new PropertyValueFactory<>("dest"));
+
+        TableColumn<TrackingTripModel, String> colStat = new TableColumn<>("Status");
+        colStat.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        table.getColumns().addAll(colId, colVeh, colSrc, colDest, colStat);
+
+        // 4. Fetch Active Trips from Database
+        ObservableList<TrackingTripModel> activeTrips = FXCollections.observableArrayList();
+        String query = "SELECT trip_id, vehicle_id, source, destination, status FROM trips WHERE status IN ('Scheduled', 'In Progress')";
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                activeTrips.add(new TrackingTripModel(
+                        rs.getString("trip_id"),
+                        rs.getString("vehicle_id"),
+                        rs.getString("source"),
+                        rs.getString("destination"),
+                        rs.getString("status")
+                ));
+            }
+            table.setItems(activeTrips);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 5. Add Table to Dialog and Handle Result
+        dialog.getDialogPane().setContent(table);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == selectButtonType && table.getSelectionModel().getSelectedItem() != null) {
+                return table.getSelectionModel().getSelectedItem().getTripId(); // Return selected ID
+            }
+            return null;
+        });
+
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(tripId -> trackTripIdField.setText(tripId)); // Auto-fill the text box!
+    }
+    @FXML
+    private void handleAddCheckpoint() {
+        String tripId = trackTripIdField.getText();
+        String seqStr = trackSequenceField.getText();
+        String location = trackLocationField.getText();
+
+        // 1. Validation
+        if (tripId.isEmpty() || seqStr.isEmpty() || location.isEmpty() || trackExpectedDatePicker.getValue() == null) {
+            Alert alert = new Alert(AlertType.WARNING, "Please fill all fields before adding a checkpoint!");
+            alert.show();
+            return;
+        }
+
+        // 2. Database Insert
+        String query = "INSERT INTO trip_checkpoints (trip_id, sequence_num, location_name, expected_time, status) VALUES (?, ?, ?, ?, 'Pending')";
+
+        // 3. Using your exact Singleton Database Connection
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setString(1, tripId);
+            pstmt.setInt(2, Integer.parseInt(seqStr));
+            pstmt.setString(3, location);
+            pstmt.setString(4, trackExpectedDatePicker.getValue().toString() + " 00:00:00");
+
+            pstmt.executeUpdate();
+
+            Alert success = new Alert(AlertType.INFORMATION, "Checkpoint added successfully!");
+            success.show();
+
+            // Clear the form after success
+            handleClearTrackingForm();
+            loadAllCheckpoints();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert error = new Alert(AlertType.ERROR, "Database Error: " + e.getMessage());
+            error.show();
+        }
+    }
+
+    @FXML
+    private void handleDeleteCheckpoint() {
+        Checkpoint selected = trackingTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            new Alert(AlertType.WARNING, "Please select a checkpoint from the table to delete!").show();
+            return;
+        }
+
+        String query = "DELETE FROM trip_checkpoints WHERE trip_id = ? AND sequence_num = ?";
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setString(1, selected.getTripId());
+            pstmt.setInt(2, selected.getSequence());
+            pstmt.executeUpdate();
+
+            new Alert(AlertType.INFORMATION, "Checkpoint deleted!").show();
+            loadAllCheckpoints(); // Refresh table
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleClearTrackingForm() {
+        trackTripIdField.clear();
+        trackSequenceField.clear();
+        trackLocationField.clear();
+        trackExpectedDatePicker.setValue(null);
+    }
+
+    @FXML
+    private void loadAllCheckpoints() {
+        ObservableList<Checkpoint> checkpointList = FXCollections.observableArrayList();
+        String query = "SELECT * FROM trip_checkpoints ORDER BY trip_id, sequence_num ASC";
+
+        try (Connection conn = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                checkpointList.add(new Checkpoint(
+                        rs.getInt("sequence_num"),
+                        rs.getString("trip_id"),
+                        rs.getString("location_name"),
+                        rs.getString("expected_time"),
+                        rs.getString("actual_time"),
+                        rs.getString("status")
+                ));
+            }
+            trackingTable.setItems(checkpointList);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @FXML
     private void showAvailableDriversPopup() {
@@ -1470,6 +1774,24 @@ public class TripController implements Initializable {
         });
 
         dialog.showAndWait().ifPresent(selectedId -> driverIdField.setText(selectedId));
+    }
+    // --- Helper Class for the Popup Table ---
+    public static class TrackingTripModel {
+        private String tripId, vehicleId, source, dest, status;
+
+        public TrackingTripModel(String tripId, String vehicleId, String source, String dest, String status) {
+            this.tripId = tripId;
+            this.vehicleId = vehicleId;
+            this.source = source;
+            this.dest = dest;
+            this.status = status;
+        }
+
+        public String getTripId() { return tripId; }
+        public String getVehicleId() { return vehicleId; }
+        public String getSource() { return source; }
+        public String getDest() { return dest; }
+        public String getStatus() { return status; }
     }
 }
 
