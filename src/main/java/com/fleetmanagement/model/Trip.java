@@ -16,6 +16,9 @@ public class Trip {
     private Double totalFuelCost;
     private Double totalTollCost;
     private Double totalOtherExpenses;
+    private String receiverId;
+    private LocalDate expectedDeliveryDate;
+
 
     // ------------------------------------------------------------
     // Default constructor
@@ -143,6 +146,12 @@ public class Trip {
         this.totalOtherExpenses = totalOtherExpenses;
     }
 
+    // Add to constructor or use setter:
+    public String getReceiverId() { return receiverId; }
+    public void setReceiverId(String receiverId) { this.receiverId = receiverId; }
+
+    public LocalDate getExpectedDeliveryDate() { return expectedDeliveryDate; }
+    public void setExpectedDeliveryDate(LocalDate expectedDeliveryDate) { this.expectedDeliveryDate = expectedDeliveryDate; }
     // ------------------------------------------------------------
     // Helper method: total cost of the trip
     // Treats any null cost component as 0 to avoid NPEs on

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Order - Fleet Management</title>
+    <style>
+        :root {
+            --primary: #ea580c;
+            --primary-light: #f97316;
+            --primary-soft: #fff7ed;
+            --primary-line: #fed7aa;
+            --dark: #0f172a;
+            --bg: #f8fafc;
+            --line: #e2e8f0;
+            --muted: #64748b;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 70px;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width); background-color: var(--dark); color: white;
+            display: flex; flex-direction: column; transition: width 0.3s ease;
+            z-index: 10; overflow: hidden; white-space: nowrap;
+        }
+        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .sidebar-header {
+            padding: 0 20px; height: 64px; font-size: 18px; font-weight: 700; display: flex;
+            align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b;
+        }
+        .sidebar.collapsed .logo-text { display: none; }
+        .sidebar.collapsed .sidebar-header { padding: 0; justify-content: center; }
+        .logo-text span { color: var(--primary-light); }
+        .sidebar-hamburger { background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; transition: color 0.2s; }
+        .sidebar-hamburger:hover { color: white; }
+
+        .sidebar-menu { list-style: none; padding: 16px 10px; margin: 0; }
+        .sidebar-menu li { margin-bottom: 4px; }
+        .sidebar-menu li a {
+            display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+            color: #94a3b8; text-decoration: none; font-weight: 500; font-size: 14px;
+            border-radius: 8px; border-left: 3px solid transparent; transition: 0.2s;
+        }
+        .sidebar.collapsed .sidebar-menu li a { justify-content: center; padding: 12px 0; }
+        .sidebar.collapsed .sidebar-menu li a span { display: none; }
+        .sidebar-menu li a:hover { background-color: #1e293b; color: white; }
+        .sidebar-menu li.active a { background-color: rgba(249,115,22,0.14); color: #fdba74; border-left-color: var(--primary-light); }
+
+        /* --- MAIN CONTAINER & NAVBAR --- */
+        .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; min-width: 0; }
+        .navbar {
+            background: white; padding: 0 28px; height: 64px; flex-shrink: 0; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 1px solid var(--line); box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            position: sticky; top: 0; z-index: 20;
+        }
+        .nav-title { font-weight: 700; color: var(--dark); font-size: 17px; display: flex; align-items: center; gap: 10px; }
+        .nav-title::before { content: ""; width: 4px; height: 20px; border-radius: 2px; background: linear-gradient(var(--primary-light), var(--primary)); }
+
+        .profile-container { position: relative; }
+        .profile-avatar {
+            width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer;
+            box-shadow: 0 3px 8px rgba(234,88,12,0.35); user-select: none; transition: transform .15s;
+        }
+        .profile-avatar:hover { transform: scale(1.06); }
+        .profile-dropdown {
+            display: none; position: absolute; right: 0; top: 54px; background: white; width: 280px;
+            border-radius: 14px; box-shadow: 0 12px 30px rgba(15,23,42,0.18); border: 1px solid var(--line); z-index: 100;
+            overflow: hidden; animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .dropdown-header { padding: 20px; background: var(--primary-soft); text-align: center; border-bottom: 1px solid var(--primary-line); }
+        .dropdown-header .avatar-large {
+            width: 52px; height: 52px; background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin: 0 auto 10px auto;
+        }
+        .dropdown-body { padding: 8px 0; }
+        .dropdown-item {
+            width: 100%; padding: 12px 20px; background: none; border: none; text-align: left; font-size: 14px;
+            color: #334155; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s;
+        }
+        .dropdown-item:hover { background: var(--primary-soft); }
+        .dropdown-divider { height: 1px; background: var(--line); margin: 6px 0; }
+
+        /* --- FORM STYLES --- */
+        .content { padding: 32px 28px; max-width: 920px; margin: 0 auto; width: 100%; }
+        h1 { color: var(--dark); margin: 0 0 4px; font-size: 26px; letter-spacing: -0.4px; }
+        .page-sub { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+        .form-card {
+            background: white; border-radius: 16px; padding: 30px; border: 1px solid var(--line);
+            box-shadow: 0 1px 3px rgba(15,23,42,0.06); border-top: 4px solid var(--primary-light);
+            animation: fadeIn .4s ease both;
+        }
+        .form-section-title {
+            font-size: 15px; font-weight: 700; color: var(--dark); padding-bottom: 10px; margin: 32px 0 18px;
+            border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px;
+        }
+        .form-section-title:first-child { margin-top: 0; }
+        .form-section-title small { font-weight: 500; color: var(--muted); font-size: 12px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .content { padding: 22px 16px; } }
+
+        .form-group { display: flex; flex-direction: column; margin-bottom: 14px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .form-group label { font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 7px; text-transform: uppercase; letter-spacing: .4px; }
+
+        input, select, textarea {
+            padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-family: inherit;
+            background: #f8fafc; color: var(--dark); transition: border-color .2s, box-shadow .2s, background .2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--primary-light); background: #fff; box-shadow: 0 0 0 3px rgba(249,115,22,0.18);
+        }
+        textarea { resize: vertical; }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white; padding: 14px; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 18px;
+            transition: filter .2s, transform .15s; box-shadow: 0 6px 16px rgba(234,88,12,0.3);
+        }
+        .submit-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+
+        /* --- SEND ANIMATION OVERLAY --- */
+        .send-overlay {
+            display: none; position: fixed; inset: 0; z-index: 300;
+            background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; padding: 16px;
+        }
+        .send-card {
+            background: white; width: 460px; max-width: 100%; border-radius: 18px; padding: 30px 24px 26px;
+            text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.35); animation: scaleIn .25s ease;
+        }
+        @keyframes scaleIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .scene { position: relative; width: 100%; height: 120px; margin-bottom: 8px; }
+        .ground {
+            position: absolute; left: 0; right: 0; bottom: 22px; height: 3px; border-radius: 2px;
+            background: repeating-linear-gradient(90deg, var(--primary-line) 0 12px, transparent 12px 22px);
+        }
+        .sender { position: absolute; left: 0; bottom: 24px; font-size: 44px; line-height: 1; }
+        .admin { position: absolute; right: 0; bottom: 24px; font-size: 58px; line-height: 1; transform-origin: bottom center; }
+        .admin.received { animation: bump .6s ease; }
+        @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+        .tag { position: absolute; bottom: 2px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+        .tag.l { left: 4px; } .tag.r { right: 6px; }
+        .mail {
+            position: absolute; left: 14%; bottom: 62px; font-size: 32px; line-height: 1;
+            transition: left 1.5s cubic-bezier(0.45, 0, 0.25, 1), transform .45s ease, opacity .45s ease;
+            animation: floaty .5s ease-in-out infinite alternate;
+        }
+        .mail.fly { left: 72%; }
+        .mail.arrived { transform: scale(0.1); opacity: 0; animation: none; }
+        @keyframes floaty { from { margin-bottom: 0; } to { margin-bottom: 10px; } }
+        .tick {
+            font-size: 48px; height: 58px; line-height: 58px; transform: scale(0);
+            transition: transform .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .tick.show { transform: scale(1); }
+        .send-text { font-weight: 700; color: var(--dark); font-size: 17px; margin-top: 6px; }
+        .send-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <span class="logo-text">🎁 Client <span>Portal</span></span>
+        <button class="sidebar-hamburger" onclick="toggleSidebar()">☰</button>
+    </div>
+    <ul class="sidebar-menu">
+        <li><a href="#" id="navDashboard">📊 <span>Dashboard</span></a></li>
+        <li><a href="#" id="navShipments">📦 <span>My Shipments</span></a></li>
+        <li class="active"><a href="#">➕ <span>Request New Order</span></a></li>
+        <li><a href="receiver_settings.html?id=R003" id="navSettings">⚙️ <span>Account Settings</span></a></li>
+    </ul>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div class="main-container">
+    <div class="navbar">
+        <span class="nav-title">Fleet Management System</span>
+        <div class="profile-container">
+            <div class="profile-avatar" id="avatarLetter" onclick="toggleProfileMenu()">R</div>
+            <div class="profile-dropdown" id="profileDropdown">
+                <div class="dropdown-header">
+                    <div class="avatar-large" id="avatarLargeLetter">R</div>
+                    <div id="dropdownReceiverId" style="font-weight: bold; color: var(--dark);">Client R001</div>
+                    <div style="font-size: 12px; color: #64748b;">Verified Receiver Account</div>
+                </div>
+                <div class="dropdown-body">
+                    <button class="dropdown-item" onclick="window.location.reload()">🔄 Refresh Form</button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" onclick="logout()" style="color: #dc2626;">🚪 Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT BODY -->
+    <div class="content">
+        <h1>Request New Shipment 🚛</h1>
+        <p class="page-sub">Submit a request for the fleet manager to dispatch a vehicle to your supplier.</p>
+
+        <div class="form-card">
+            <form id="orderRequestForm" onsubmit="submitOrderRequest(event)">
+
+                <div class="form-section-title">📦 Pickup Details <small>Where we collect the goods</small></div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Supplier / Pickup Point Name</label>
+                        <input type="text" id="supplierName" placeholder="e.g., Apex Electronics Warehouse" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pickup Date Needed</label>
+                        <input type="date" id="pickupDate" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Exact Pickup Address / City</label>
+                        <input type="text" id="pickupAddress" placeholder="Enter full address or city" required>
+                    </div>
+                </div>
+
+                <div class="form-section-title">📍 Delivery Details <small>Where we drop them off</small></div>
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Your Delivery Address</label>
+                        <input type="text" id="deliveryAddress" placeholder="Your warehouse or store address" required>
+                    </div>
+                </div>
+
+                <div class="form-section-title">⚖️ Cargo Specifications</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Type of Goods</label>
+                        <select id="cargoType" required>
+                            <option value="">Select Cargo Type</option>
+                            <option value="General Cargo">General Cargo</option>
+                            <option value="Fragile / Electronics">Fragile / Electronics</option>
+                            <option value="Temperature Controlled">Temperature Controlled</option>
+                            <option value="Heavy Machinery">Heavy Machinery</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Approx. Total Weight (kg)</label>
+                        <input type="number" id="cargoWeight" placeholder="e.g., 500" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Special Instructions (Optional)</label>
+                        <textarea id="remarks" rows="3" placeholder="Any handling instructions or contact details at pickup point..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Order Request for Approval</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- SEND ANIMATION OVERLAY -->
+<div class="send-overlay" id="sendOverlay">
+    <div class="send-card">
+        <div class="scene">
+            <div class="ground"></div>
+            <div class="sender">🧑‍💼</div>
+            <div class="admin" id="adminBuilding">🏢</div>
+            <div class="mail" id="mail">✉️</div>
+            <span class="tag l">You</span>
+            <span class="tag r">Admin</span>
+        </div>
+        <div class="tick" id="sendTick">✅</div>
+        <div class="send-text" id="sendText">Sending your request...</div>
+        <div class="send-sub" id="sendSub">Delivering to the Admin office</div>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const receiverId = urlParams.get('id') || "R001";
+
+    // Setup Sidebar Links & Profile
+    document.getElementById('navDashboard').href = `receiver_dashboard.html?id=${receiverId}`;
+    document.getElementById('navShipments').href = `receiver_shipments.html?id=${receiverId}`;
+    document.getElementById('navSettings').href = `receiver_settings.html?id=${receiverId}`;
+    document.getElementById('avatarLetter').innerText = receiverId.charAt(0).toUpperCase();
+    document.getElementById('avatarLargeLetter').innerText = receiverId.charAt(0).toUpperCase();
+    document.getElementById('dropdownReceiverId').innerText = "Client " + receiverId;
+
+    // Sidebar & Profile Logic
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+    function toggleProfileMenu() {
+        const menu = document.getElementById('profileDropdown');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+    window.onclick = function(event) {
+        if (!event.target.closest('.profile-container')) document.getElementById('profileDropdown').style.display = 'none';
+    }
+    function logout() { window.location.replace('/receiver_login.html'); }
+
+    // Set minimum date for pickup to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('pickupDate').setAttribute('min', today);
+
+    // --- SEND ANIMATION HELPERS (display only) ---
+    function startSendAnimation() {
+        document.getElementById('mail').classList.remove('fly', 'arrived');
+        document.getElementById('sendTick').classList.remove('show');
+        document.getElementById('adminBuilding').classList.remove('received');
+        document.getElementById('sendText').innerText = "Sending your request...";
+        document.getElementById('sendSub').innerText = "Delivering to the Admin office";
+        document.getElementById('sendOverlay').style.display = 'flex';
+        setTimeout(() => document.getElementById('mail').classList.add('fly'), 100);   // mail flies to the building
+    }
+
+    function hideSendAnimation() {
+        document.getElementById('sendOverlay').style.display = 'none';
+    }
+
+    // Mail reached the building -> it slips inside, building bumps, tick appears
+    function playDeliveredAnimation() {
+        document.getElementById('mail').classList.add('arrived');
+        document.getElementById('adminBuilding').classList.add('received');
+        setTimeout(() => {
+            document.getElementById('sendTick').classList.add('show');
+            document.getElementById('sendText').innerText = "Request Delivered to Admin!";
+            document.getElementById('sendSub').innerText = "It is now pending approval. Redirecting...";
+        }, 450);
+    }
+
+    // Form Submission Logic
+    async function submitOrderRequest(event) {
+        event.preventDefault();
+
+        const payload = {
+            receiverId: receiverId,
+            supplierName: document.getElementById('supplierName').value,
+            pickupDate: document.getElementById('pickupDate').value,
+            pickupAddress: document.getElementById('pickupAddress').value,
+            deliveryAddress: document.getElementById('deliveryAddress').value,
+            cargoType: document.getElementById('cargoType').value,
+            cargoWeight: document.getElementById('cargoWeight').value,
+            remarks: document.getElementById('remarks').value
+        };
+
+        startSendAnimation();
+
+        try {
+            const response = await fetch('/api/receiver/requestOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            // Wait for the mail to reach the building (1.5s)
+            setTimeout(() => {
+                if (result.success) {
+                    playDeliveredAnimation();
+                    setTimeout(() => {
+                        window.location.href = `receiver_dashboard.html?id=${receiverId}`;
+                    }, 2600);
+                } else {
+                    hideSendAnimation();
+                    alert("Error submitting request: " + result.message);
+                }
+            }, 1500);
+        } catch (e) {
+            console.error(e);
+            hideSendAnimation();
+            alert("Server connection error.");
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane fx:id="rootPane" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.fleetmanagement.controllers.ReceiverController"
+            stylesheets="@style.css"
+            style="-fx-background-color: #f1f5f9;">
+
+    <!-- LEFT SIDEBAR -->
+    <left>
+        <VBox fx:id="sidebar" prefWidth="220" style="-fx-background-color: #0f172a;" spacing="2">
+            <padding><Insets top="25" right="0" bottom="25" left="0"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <VBox.margin><Insets left="15" right="10" bottom="30"/></VBox.margin>
+                <StackPane prefWidth="36" prefHeight="36" style="-fx-background-color: #2563eb; -fx-background-radius: 8;">
+                    <Label text="🚛" style="-fx-font-size: 18px;"/>
+                </StackPane>
+                <VBox spacing="0">
+                    <Label text="𝙁𝙇𝙀𝙀𝙏" textFill="WHITE" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    <Label text="𝙈𝘼𝙉𝘼𝙂𝙀𝙈𝙀𝙉𝙏" textFill="#94a3b8" style="-fx-font-weight: bold; -fx-font-size: 10px;"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="☰" onAction="#toggleSidebar" style="-fx-background-color: transparent; -fx-text-fill: #cbd5e1; -fx-font-size: 18px; -fx-cursor: hand; -fx-padding: 0;"/>
+            </HBox>
+
+            <Label text="  📊    Dashboard" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDashboard"/>
+            <Label text="  🚛    Vehicles" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToVehicles"/>
+            <Label text="  👨‍✈️    Drivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDrivers"/>
+            <Label text="  🎁    Receivers" textFill="WHITE" prefWidth="220" prefHeight="45" style="-fx-background-color: #2563eb; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReceivers"/>
+            <Label text="  🛣️    Trips" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToTrips"/>
+            <Label text="  🔧    Maintenance" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToMaintenance"/>
+            <Label text="  🚨    Incidents" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToIncidents"/>
+            <Label text="  📈    Reports" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReports"/>
+            <Label text="  📥    Order Requests" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToOrderRequests"/>
+            <Label text="  📦    Order Proof" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToOrderProof"/>
+            <Label text="  ⚙️    Settings" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToSettings"/>
+        </VBox>
+    </left>
+
+    <!-- CENTER CONTENT -->
+    <center>
+        <VBox spacing="15">
+            <padding>
+                <Insets top="20" right="25" bottom="20" left="25"/>
+            </padding>
+
+            <!-- HEADER & HAMBURGER -->
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Button fx:id="btnHamburger" text="☰" onAction="#toggleSidebar" visible="false" managed="false"
+                        prefHeight="35" prefWidth="40"
+                        style="-fx-background-color: #e2e8f0; -fx-text-fill: #0f172a; -fx-background-radius: 6; -fx-font-size: 18px; -fx-cursor: hand;"/>
+                <Label text="Receiver Management" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+            </HBox>
+
+            <!-- FORM CONTAINER -->
+            <VBox spacing="12" style="-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);">
+                <padding>
+                    <Insets top="18" right="22" bottom="18" left="22"/>
+                </padding>
+
+                <GridPane hgap="20" vgap="12">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="110"/>
+                        <ColumnConstraints minWidth="220"/>
+                        <ColumnConstraints minWidth="110"/>
+                        <ColumnConstraints minWidth="220"/>
+                    </columnConstraints>
+
+                    <Label text="Receiver ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="receiverIdField" promptText="Auto-generated" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                    <Label text="Receiver Name" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                    <TextField fx:id="nameField" promptText="e.g. John Receiver" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                    <Label text="Email" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="emailField" promptText="e.g. client@fleet.com" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                    <Label text="Password" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                    <TextField fx:id="passwordField" promptText="Auto-generated (e.g. R001@1228)" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                    <Label text="Phone" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="phoneField" promptText="e.g. 9876543210" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                    <Label text="Company Name" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                    <TextField fx:id="companyNameField" promptText="e.g. Global Logistics" style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+                </GridPane>
+
+                <!-- ACTION BUTTONS -->
+                <HBox spacing="10">
+                    <VBox.margin><Insets top="8"/></VBox.margin>
+
+                    <Button fx:id="btnAdd" text="Add" prefWidth="85" prefHeight="33"
+                            style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"
+                            onAction="#handleAddReceiver"/>
+
+                    <Button fx:id="btnUpdate" text="Update" prefWidth="85" prefHeight="33"
+                            style="-fx-background-color: #16a34a; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"
+                            onAction="#handleUpdateReceiver"/>
+
+                    <Button fx:id="btnDelete" text="Delete" prefWidth="85" prefHeight="33"
+                            style="-fx-background-color: #dc2626; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"
+                            onAction="#handleDeleteReceiver"/>
+
+                    <Button fx:id="btnClear" text="Clear" prefWidth="85" prefHeight="33"
+                            style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"
+                            onAction="#handleClearForm"/>
+
+                    <Button fx:id="btnClearAll" text="Clear All" prefWidth="95" prefHeight="33"
+                            style="-fx-background-color: #7c2d12; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"
+                            onAction="#handleClearAllRecords"/>
+                </HBox>
+            </VBox>
+
+            <!-- SEARCH FILTER SECTION -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Filter By:" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="filterCategoryComboBox" prefWidth="150" style="-fx-background-radius: 6;"/>
+                <TextField fx:id="searchField" promptText="Enter keyword to search..." prefWidth="250"
+                           style="-fx-background-radius: 6; -fx-border-radius: 6; -fx-border-color: #cbd5e1;"/>
+
+                <Button fx:id="btnSearch" text="🔍 Search" prefWidth="90" prefHeight="30"
+                        style="-fx-background-color: #0f172a; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"
+                        onAction="#handleSearchReceiver"/>
+
+                <Button text="Reset" prefWidth="75" prefHeight="30"
+                        style="-fx-background-color: #64748b; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"
+                        onAction="#handleResetSearchAction"/>
+            </HBox>
+
+            <!-- TABLE VIEW -->
+            <TableView fx:id="receiverTable" prefHeight="260" VBox.vgrow="ALWAYS"
+                       style="-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);">
+                <columns>
+                    <TableColumn fx:id="colReceiverId" text="Receiver ID" prefWidth="100"/>
+                    <TableColumn fx:id="colName" text="Name" prefWidth="130"/>
+                    <TableColumn fx:id="colEmail" text="Email" prefWidth="150"/>
+                    <TableColumn fx:id="colPassword" text="Password" prefWidth="130"/> <!-- ADDED HERE -->
+                    <TableColumn fx:id="colPhone" text="Phone" prefWidth="120"/>
+                    <TableColumn fx:id="colCompanyName" text="Company Name" prefWidth="150"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>

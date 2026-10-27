@@ -12,7 +12,7 @@ public class DatabaseConnection {
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
     private static final String URL = "jdbc:mysql://localhost:3306/fleet_management_v2";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "yourpassword";
+    private static final String PASSWORD = "Hitesh@1228";
 
     // ------------------------------------------------------------
     // Singleton instance

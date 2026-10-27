@@ -188,6 +188,13 @@ public class IncidentController implements Initializable {
     @FXML private void switchToReports() { loadScene("/report_view.fxml", "Reports"); }
     @FXML private void switchToSettings() { loadScene("/settings_view.fxml", "Settings"); }
     @FXML private void switchToIncidents() { loadScene("/incident_view.fxml", "Incident Management"); }
+    @FXML private void switchToOrderProof() { loadScene("/orderproof_view.fxml", "Order Proof"); }
+    @FXML private void switchToOrderRequests() { loadScene("/orderrequest_view.fxml", "Order Requests"); }
+    @FXML
+    private void switchToReceivers() {
+        loadScene("/receiver_view.fxml", "Receiver Management");
+    }
+
 
     private void loadScene(String fxmlPath, String title) {
         try {

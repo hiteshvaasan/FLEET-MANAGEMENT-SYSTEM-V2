@@ -8,64 +8,184 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; margin: 0; padding: 0; }
-        .navbar { background-color: #0f172a; color: white; padding: 15px 20px; display: flex; justify-content: space-between; }
-        .back-btn { color: #38bdf8; text-decoration: none; font-weight: bold; }
-        .container { max-width: 900px; margin: 20px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        :root {
+            --primary: #ea580c;
+            --primary-light: #f97316;
+            --primary-soft: #fff7ed;
+            --primary-line: #fed7aa;
+            --dark: #0f172a;
+            --muted: #64748b;
+            --line: #e2e8f0;
+            --red: #dc2626;
+            --red-dark: #991b1b;
+            --red-soft: #fef2f2;
+            --red-line: #fecaca;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8fafc; margin: 0; padding: 0; color: var(--dark); }
 
-        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+        /* --- NAVBAR --- */
+        .navbar {
+            background-color: var(--dark); color: white; padding: 0 24px; height: 64px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 3px solid var(--primary-light);
+            position: sticky; top: 0; z-index: 500;
+        }
+        .back-btn {
+            color: #fdba74; text-decoration: none; font-weight: 600; font-size: 14px;
+            padding: 8px 14px; border-radius: 8px; transition: background .2s, color .2s;
+        }
+        .back-btn:hover { background: rgba(249,115,22,0.15); color: #fff; }
+        .nav-title { margin: 0; font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .live-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--primary-light); animation: pulse 1.6s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(249,115,22,0.6); } 70% { box-shadow: 0 0 0 9px rgba(249,115,22,0); } 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0); } }
 
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        h3 { margin-top: 0; color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .container { max-width: 1000px; margin: 26px auto; padding: 0 20px; }
+
+        /* Main Layout Grid */
+        .tracking-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; align-items: start; }
+        @media (max-width: 768px) { .tracking-grid { grid-template-columns: 1fr; } }
+
+        .card {
+            background: white; padding: 22px; border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(15,23,42,0.06); border: 1px solid var(--line);
+            animation: fadeUp .4s ease both;
+        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        h3 {
+            margin: 0 0 16px; color: var(--dark); font-size: 16px; font-weight: 700;
+            padding-bottom: 12px; border-bottom: 1px solid var(--line);
+            display: flex; align-items: center; gap: 8px;
+        }
+        h3::after { content: ""; flex: 1; height: 2px; background: linear-gradient(90deg, var(--primary-line), transparent); margin-left: 8px; border-radius: 2px; }
 
         /* Map Container */
-        #map { height: 350px; border-radius: 8px; width: 100%; background: #e2e8f0; }
+        #map { height: 350px; border-radius: 10px; width: 100%; background: var(--line); border: 1px solid var(--line); z-index: 1; }
 
         /* Timeline Styles */
-        .timeline { list-style: none; padding: 0; margin: 0; border-left: 3px solid #cbd5e1; margin-left: 10px; }
-        .timeline li { padding-left: 20px; position: relative; margin-bottom: 20px; }
+        .timeline { list-style: none; padding: 0; margin: 0 0 0 10px; border-left: 3px solid var(--line); }
+        .timeline li { padding-left: 22px; position: relative; margin-bottom: 22px; font-size: 14px; }
+        .timeline li:last-child { margin-bottom: 0; }
         .timeline li::before {
-            content: ''; position: absolute; left: -10px; top: 0; width: 16px; height: 16px;
-            border-radius: 50%; background: #cbd5e1; border: 3px solid white;
+            content: ''; position: absolute; left: -11px; top: 0; width: 18px; height: 18px;
+            border-radius: 50%; background: #cbd5e1; border: 3px solid white; box-shadow: 0 0 0 1px var(--line);
         }
-        .timeline li.reached::before { background: #10b981; }
-        .timeline li.pending::before { background: #f59e0b; }
-        .time-label { display: block; font-size: 12px; color: #64748b; margin-top: 4px; }
+        .timeline li.reached::before { background: #10b981; box-shadow: 0 0 0 1px #a7f3d0; }
+        .timeline li.pending::before { background: var(--primary-light); box-shadow: 0 0 0 1px var(--primary-line); }
+        .timeline li strong { color: var(--dark); }
+        .time-label { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
 
         /* Driver Info */
-        .driver-info p { margin: 8px 0; color: #475569; font-weight: 500; }
-        .driver-info span { color: #0f172a; font-weight: bold; float: right; }
+        .driver-info p {
+            margin: 0; padding: 12px 0; color: var(--muted); font-weight: 500; font-size: 14px;
+            display: flex; justify-content: space-between; align-items: center; gap: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .driver-info p:last-child { border-bottom: none; padding-bottom: 0; }
+        .driver-info span { color: var(--dark); font-weight: 700; text-align: right; }
+        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; background: var(--primary-soft); color: var(--primary) !important; border: 1px solid var(--primary-line); }
+        .status-pill.done { background: #dcfce7; color: #16a34a !important; border-color: #86efac; }
+
+        /* --- INCIDENT BANNER (RED THEME) --- */
+        #incidentAlertBanner {
+            display: none; cursor: pointer; background: var(--red-soft); border: 1px solid var(--red-line);
+            border-left: 5px solid var(--red); color: var(--red-dark); padding: 14px 20px; border-radius: 10px;
+            margin-bottom: 20px; align-items: center; justify-content: space-between; gap: 14px;
+            box-shadow: 0 2px 8px rgba(220,38,38,0.1); transition: box-shadow .2s, transform .15s;
+            animation: fadeUp .4s ease both;
+        }
+        #incidentAlertBanner:hover { box-shadow: 0 6px 16px rgba(220,38,38,0.2); transform: translateY(-1px); }
+        .alert-icon { font-size: 24px; animation: shake 2.4s infinite; }
+        @keyframes shake { 0%, 90%, 100% { transform: rotate(0); } 93% { transform: rotate(-12deg); } 96% { transform: rotate(12deg); } }
+        .alert-text { flex: 1; font-size: 14px; }
+        .alert-hint { font-size: 12px; color: var(--red); margin-top: 6px; font-weight: 600; }
+        .inc-badge { background: #fee2e2; color: var(--red-dark); padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; white-space: nowrap; border: 1px solid var(--red-line); }
+        .inc-badge.resolved { background: #dcfce7; color: #16a34a; border-color: #86efac; }
+        .inc-badge.progress { background: #fef3c7; color: #b45309; border-color: #fde68a; }
+
+        /* --- INCIDENT MODAL (RED THEME) --- */
+        .inc-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; z-index: 1000; padding: 16px;
+        }
+        .inc-modal {
+            background: white; width: 420px; max-width: 100%; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.35); animation: scaleIn .22s ease;
+        }
+        @keyframes scaleIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .inc-head {
+            background: linear-gradient(135deg, var(--red), var(--red-dark)); color: white;
+            padding: 24px 22px; position: relative; text-align: center;
+        }
+        .inc-head .big-icon {
+            width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,0.18);
+            display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 10px;
+        }
+        .inc-head h3 { margin: 0; border: none; padding: 0; color: white; font-size: 18px; display: block; }
+        .inc-head h3::after { display: none; }
+        .inc-head .inc-sub { font-size: 12px; color: #fecaca; margin-top: 4px; }
+        .inc-close {
+            position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.18); border: none; color: white;
+            width: 30px; height: 30px; border-radius: 50%; font-size: 14px; cursor: pointer;
+        }
+        .inc-close:hover { background: rgba(255,255,255,0.32); }
+        .inc-body { padding: 22px 24px 24px; }
+        .inc-row { padding: 11px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .inc-row .k { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+        .inc-row .v { display: block; color: var(--dark); font-weight: 600; line-height: 1.45; word-break: break-word; }
+        .inc-row .inc-badge { display: inline-block; }
+        .inc-row.desc .v { margin-top: 6px; background: var(--red-soft); border: 1px solid var(--red-line); border-radius: 8px; padding: 10px 12px; font-weight: 500; color: var(--red-dark); }
+        .inc-btn {
+            width: 100%; margin-top: 18px; padding: 12px; background: linear-gradient(135deg, var(--red), var(--red-dark));
+            color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; transition: filter .2s;
+        }
+        .inc-btn:hover { filter: brightness(1.1); }
     </style>
 </head>
 <body>
 
 <div class="navbar">
     <a href="javascript:history.back()" class="back-btn">← Back to Dashboard</a>
-    <h2 style="margin: 0; font-size: 18px;">Live Tracking</h2>
+    <h2 class="nav-title"><span class="live-dot"></span>Live Tracking</h2>
 </div>
 
 <div class="container">
-    <!-- Left Column: Map and Driver Info -->
-    <div>
-        <div class="card" style="margin-bottom: 20px;">
-            <h3>📍 Live Location Route</h3>
-            <div id="map"></div>
-        </div>
 
-        <div class="card driver-info">
-            <h3>🚚 Driver & Vehicle Details</h3>
-            <p>Driver Name: <span id="driverName">Loading...</span></p>
-            <p>Vehicle: <span id="vehicleInfo">Loading...</span></p>
-            <p>Trip Status: <span id="tripStatus">Loading...</span></p>
+    <!-- Incident Alert Banner (Hidden by default) -->
+    <div id="incidentAlertBanner" onclick="openIncidentModal()">
+        <span class="alert-icon">⚠️</span>
+        <div class="alert-text">
+            <b>Transit Incident Reported:</b> <span id="incidentTypeText">Delay / Hazard</span>
+            <div style="font-size: 13px; margin-top: 4px;" id="incidentDescText">Description goes here...</div>
+            <div class="alert-hint">Click for full details →</div>
         </div>
+        <span id="incidentStatusBadge" class="inc-badge">Open</span>
     </div>
 
-    <!-- Right Column: Checkpoint Timeline -->
-    <div class="card">
-        <h3>⏳ Delivery Milestones</h3>
-        <ul class="timeline" id="timelineList">
-            <li class="pending">Loading checkpoints...</li>
-        </ul>
+    <div class="tracking-grid">
+        <!-- Left Column: Map and Driver Info -->
+        <div>
+            <div class="card" style="margin-bottom: 20px;">
+                <h3>📍 Live Location Route</h3>
+                <div id="map"></div>
+            </div>
+
+            <div class="card driver-info">
+                <h3>🚚 Driver & Vehicle Details</h3>
+                <p>Driver Name <span id="driverName">Loading...</span></p>
+                <p>Vehicle <span id="vehicleInfo">Loading...</span></p>
+                <p>Trip Status <span id="tripStatus" class="status-pill">Loading...</span></p>
+            </div>
+        </div>
+
+        <!-- Right Column: Checkpoint Timeline -->
+        <div class="card">
+            <h3>⏳ Delivery Milestones</h3>
+            <ul class="timeline" id="timelineList">
+                <li class="pending">Loading checkpoints...</li>
+            </ul>
+        </div>
     </div>
 </div>
 
@@ -79,19 +199,30 @@
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
+    // Colour a status badge by its text (display only)
+    function styleStatusBadge(el, status) {
+        const s = (status || '').toLowerCase();
+        el.classList.remove('resolved', 'progress');
+        if (s.includes('resolv') || s.includes('closed')) el.classList.add('resolved');
+        else if (s.includes('progress') || s.includes('review')) el.classList.add('progress');
+    }
+
     async function loadTrackingData() {
         if (!tripId) return alert("No Trip ID provided.");
 
         try {
             const response = await fetch(`/api/receiver/track?tripId=${tripId}`);
+            console.log("Track API status:", response.status, response.url);
             const result = await response.json();
+            console.log("Track API result:", result);
 
             if (result.success) {
                 const data = result.data;
 
                 document.getElementById('driverName').innerText = data.driverName;
                 document.getElementById('vehicleInfo').innerText = data.vehicleInfo;
-                document.getElementById('tripStatus').innerText = data.status;
+                document.getElementById('tripStatus').innerText = data.status || '-';
+                document.getElementById('tripStatus').classList.toggle('done', (data.status || '').toLowerCase() === 'completed');
 
                 // Build Timeline
                 const timelineList = document.getElementById('timelineList');
@@ -100,24 +231,157 @@
                 if (data.checkpoints && data.checkpoints.length > 0) {
                     data.checkpoints.forEach(cp => {
                         const li = document.createElement('li');
-                        // If status is Reached/Completed, color it green
                         li.className = cp.status.toLowerCase() === 'pending' ? 'pending' : 'reached';
                         li.innerHTML = `
-                                <strong>${cp.location}</strong>
-                                <span class="time-label">${cp.status} • ${cp.time || 'Awaiting update'}</span>
-                            `;
+                            <strong>${cp.location}</strong>
+                            <span class="time-label">${cp.status} - ${cp.time || 'Awaiting update'}</span>
+                        `;
                         timelineList.appendChild(li);
                     });
                 } else {
                     timelineList.innerHTML = '<li class="pending">No checkpoints recorded yet.</li>';
                 }
+            } else {
+                showTrackingError(result.message || "Server returned no tracking data for this trip.");
             }
         } catch (error) {
             console.error("Error fetching tracking data:", error);
+            showTrackingError("Could not load tracking data from the server.");
         }
     }
 
-    loadTrackingData();
+    // Replace endless "Loading..." with a visible message (display only)
+    function showTrackingError(msg) {
+        document.getElementById('driverName').innerText = "-";
+        document.getElementById('vehicleInfo').innerText = "-";
+        document.getElementById('tripStatus').innerText = "Unavailable";
+        document.getElementById('timelineList').innerHTML = '<li class="pending">' + msg + '</li>';
+    }
+
+    // Fetch Incidents for this Trip
+    let currentIncidentData = null;
+
+    // Store incident data when fetched
+    async function loadTripIncidents() {
+        if (!tripId) return;
+
+        try {
+            const response = await fetch(`/api/trip/incidents?tripId=${tripId}`);
+            const result = await response.json();
+
+            if (result.success && result.data.length > 0) {
+                currentIncidentData = result.data[0]; // Save reference
+
+                document.getElementById('incidentTypeText').innerText = currentIncidentData.type;
+                document.getElementById('incidentDescText').innerText = currentIncidentData.description + " (Reported: " + currentIncidentData.reportedAt + ")";
+                const badge = document.getElementById('incidentStatusBadge');
+                badge.innerText = currentIncidentData.status;
+                styleStatusBadge(badge, currentIncidentData.status);
+
+                // Show the banner
+                document.getElementById('incidentAlertBanner').style.display = 'flex';
+            }
+        } catch (error) {
+            console.error("Error fetching incidents:", error);
+        }
+    }
+
+    // Open Modal with detailed view
+    function openIncidentModal() {
+        if (!currentIncidentData) return;
+
+        document.getElementById('modalIncType').innerText = currentIncidentData.type;
+        document.getElementById('modalIncDesc').innerText = currentIncidentData.description;
+        document.getElementById('modalIncTime').innerText = currentIncidentData.reportedAt;
+        document.getElementById('modalIncStatus').innerText = currentIncidentData.status;
+
+        const photoContainer = document.getElementById('incidentPhotoContainer');
+        const photoImg = document.getElementById('modalIncPhoto');
+
+        if (currentIncidentData.photoUrl) {
+            // If your Admin side uses an uploads folder or a static path route,
+            // prepend the exact same path prefix that your Admin page uses!
+            // For example, if Admin uses "/uploads/" + filename, use this:
+            photoImg.src = "/uploads/" + currentIncidentData.photoUrl;
+
+            // OR if your Admin side uses a dedicated endpoint like "/api/images/" + filename, use that:
+            // photoImg.src = "/api/images/" + currentIncidentData.photoUrl;
+
+            photoContainer.style.display = 'block';
+        } else {
+            photoContainer.style.display = 'none';
+        }
+
+        document.getElementById('incidentModal').style.display = 'flex';
+    }
+
+    // Close Modal
+    function closeIncidentModal() {
+        document.getElementById('incidentModal').style.display = 'none';
+    }
+
+    // Close when clicking the dark area outside the modal, or pressing Esc
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('incidentModal').addEventListener('click', (e) => {
+            if (e.target.id === 'incidentModal') closeIncidentModal();
+        });
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeIncidentModal(); });
+
+    // Real driver & vehicle details (the tracking API only returns placeholder values)
+    async function loadTripDetails() {
+        if (!tripId) return;
+        try {
+            const response = await fetch(`/api/trip/details?tripId=${tripId}`);
+            console.log("Trip details status:", response.status);
+            const result = await response.json();
+            console.log("Trip details result:", result);
+            if (result.success) {
+                const d = result.data;
+                document.getElementById('driverName').innerText = d.driverName || "Unassigned";
+                document.getElementById('vehicleInfo').innerText = d.vehicleId || "Not assigned";
+                if (d.status) {
+                    const st = document.getElementById('tripStatus');
+                    st.innerText = d.status;
+                    st.classList.toggle('done', d.status.toLowerCase() === 'completed');
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching trip details:", error);
+        }
+    }
+
+    // Load everything on page load (details load after tracking so real values win)
+    loadTrackingData().then(loadTripDetails);
+    loadTripIncidents().then(() => map.invalidateSize());
+    window.addEventListener('load', () => setTimeout(() => map.invalidateSize(), 300));
 </script>
+
+<!-- Incident Details Modal -->
+<div id="incidentModal" class="inc-overlay">
+    <div class="inc-modal">
+        <div class="inc-head">
+            <button class="inc-close" onclick="closeIncidentModal()">✕</button>
+            <div class="big-icon">⚠️</div>
+            <h3>Incident Report Details</h3>
+            <div class="inc-sub">Reported during transit of your shipment</div>
+        </div>
+
+        <!-- Add this inside your modal body where you want the photo to show -->
+        <div id="incidentPhotoContainer" style="margin-bottom: 15px; display: none;">
+            <p style="margin: 0 0 6px 0; font-size: 14px; color: #475569;"><b>Attached Photo:</b></p>
+            <img id="modalIncPhoto" src="" alt="Incident Photo" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1;">
+        </div>
+
+        <div class="inc-body">
+            <div class="inc-row"><span class="k">Type</span><span class="v" id="modalIncType">-</span></div>
+            <div class="inc-row desc"><span class="k">Description</span><span class="v" id="modalIncDesc">-</span></div>
+            <div class="inc-row"><span class="k">Reported At</span><span class="v" id="modalIncTime">-</span></div>
+            <div class="inc-row" style="border-bottom:none;"><span class="k">Status</span><span class="inc-badge" id="modalIncStatus">-</span></div>
+            <button class="inc-btn" onclick="closeIncidentModal()">Close</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

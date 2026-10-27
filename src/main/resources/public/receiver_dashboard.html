@@ -5,150 +5,446 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receiver Dashboard - Fleet Management</title>
     <style>
+        :root {
+            --primary: #ea580c;
+            --primary-light: #f97316;
+            --primary-soft: #fff7ed;
+            --primary-line: #fed7aa;
+            --dark: #0f172a;
+            --bg: #f8fafc;
+            --line: #e2e8f0;
+            --muted: #64748b;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 70px;
+        }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f1f5f9;
+            background-color: var(--bg);
             margin: 0;
-            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
         }
-        /* Top Navigation Bar */
-        .navbar {
-            background-color: #0f172a;
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--dark);
             color: white;
-            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            z-index: 10;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .sidebar-header {
+            padding: 0 20px;
+            height: 64px;
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #1e293b;
+        }
+        .sidebar.collapsed .logo-text { display: none; }
+        .sidebar.collapsed .sidebar-header { padding: 0; justify-content: center; }
+        .logo-text span { color: var(--primary-light); }
+
+        .sidebar-hamburger {
+            background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8;
+            transition: color 0.2s;
+        }
+        .sidebar-hamburger:hover { color: white; }
+
+        .sidebar-menu { list-style: none; padding: 16px 10px; margin: 0; }
+        .sidebar-menu li { margin-bottom: 4px; }
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            border-radius: 8px;
+            border-left: 3px solid transparent;
+            transition: 0.2s;
+        }
+        .sidebar.collapsed .sidebar-menu li a { justify-content: center; padding: 12px 0; }
+        .sidebar.collapsed .sidebar-menu li a span { display: none; }
+        .sidebar-menu li a:hover { background-color: #1e293b; color: white; }
+        .sidebar-menu li.active a {
+            background-color: rgba(249,115,22,0.14);
+            color: #fdba74;
+            border-left-color: var(--primary-light);
+        }
+
+        /* --- MAIN CONTAINER --- */
+        .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; min-width: 0; }
+
+        /* --- TOP NAVBAR --- */
+        .navbar {
+            background: white;
+            padding: 0 28px;
+            height: 64px;
+            flex-shrink: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--line);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            position: sticky; top: 0; z-index: 20;
         }
-        .navbar h2 { margin: 0; font-size: 20px; }
-        .logout-btn {
-            background: #ef4444; color: white; border: none;
-            padding: 8px 16px; border-radius: 6px; font-weight: bold;
-            cursor: pointer; transition: 0.2s;
-        }
-        .logout-btn:hover { background: #dc2626; }
+        .nav-title { font-weight: 700; color: var(--dark); font-size: 17px; display: flex; align-items: center; gap: 10px; }
+        .nav-title::before { content: ""; width: 4px; height: 20px; border-radius: 2px; background: linear-gradient(var(--primary-light), var(--primary)); }
 
-        /* Main Content Container */
-        .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-        .greeting { color: #0f172a; margin-bottom: 20px; }
+        /* --- PROFILE BADGE & POPUP MENU --- */
+        .profile-container { position: relative; }
+        .profile-avatar {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; cursor: pointer;
+            box-shadow: 0 3px 8px rgba(234,88,12,0.35);
+            user-select: none;
+            transition: transform .15s;
+        }
+        .profile-avatar:hover { transform: scale(1.06); }
+        .profile-dropdown {
+            display: none;
+            position: absolute; right: 0; top: 54px;
+            background: white; width: 280px;
+            border-radius: 14px; box-shadow: 0 12px 30px rgba(15,23,42,0.18);
+            border: 1px solid var(--line); z-index: 100;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .dropdown-header {
+            padding: 20px; background: var(--primary-soft); text-align: center;
+            border-bottom: 1px solid var(--primary-line);
+        }
+        .dropdown-header .avatar-large {
+            width: 52px; height: 52px; background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: bold; margin: 0 auto 10px auto;
+        }
+        .dropdown-body { padding: 8px 0; }
+        .dropdown-item {
+            width: 100%; padding: 12px 20px; background: none; border: none;
+            text-align: left; font-size: 14px; color: #334155; cursor: pointer;
+            display: flex; align-items: center; gap: 12px; transition: background 0.2s;
+        }
+        .dropdown-item:hover { background: var(--primary-soft); }
+        .dropdown-divider { height: 1px; background: var(--line); margin: 6px 0; }
+
+        /* --- CONTENT BODY --- */
+        .content { padding: 32px 28px; max-width: 920px; margin: 0 auto; width: 100%; }
+        h1 { color: var(--dark); margin: 0 0 4px; font-size: 26px; letter-spacing: -0.4px; }
+        .page-sub { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+
+        /* Summary stats */
+        .stats { display: none; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 26px; }
+        .stat {
+            background: white; border: 1px solid var(--line); border-radius: 12px;
+            padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .stat .num { font-size: 26px; font-weight: 800; color: var(--dark); }
+        .stat .lbl { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+        .stat.accent .num { color: var(--primary); }
+        .section-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin: 0 0 12px; }
 
         /* Shipment Cards */
-        .card {
-            background: white; padding: 20px; border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px;
-            border-left: 5px solid #2563eb;
+        .shipment-card {
+            background: white; padding: 20px 24px; border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(15,23,42,0.06); margin-bottom: 16px;
+            border: 1px solid var(--line); position: relative;
+            transition: box-shadow .2s, transform .2s, border-color .2s;
+            animation: fadeIn .35s ease both;
         }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .trip-id { font-size: 18px; font-weight: bold; color: #0f172a; margin: 0; }
+        .shipment-card:hover { box-shadow: 0 8px 20px rgba(15,23,42,0.09); transform: translateY(-2px); border-color: var(--primary-line); }
+        .shipment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; }
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+        .badge.completed { background: #dcfce7; color: #16a34a; }
+        .badge.in-progress { background: var(--primary-soft); color: var(--primary); border: 1px solid var(--primary-line); }
+        .shipment-details p { margin: 7px 0; color: var(--muted); font-size: 14px; }
+        .shipment-details b { color: #334155; }
 
-        /* Status Badges */
-        .status { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .status.completed { background: #d1fae5; color: #065f46; }
-        .status.in-progress { background: #dbeafe; color: #1e40af; }
-        .status.pending { background: #fef3c7; color: #92400e; }
-
-        .route-info { color: #475569; margin: 5px 0; font-size: 15px; font-weight: 500;}
-        .date-info { color: #64748b; font-size: 14px; margin-bottom: 15px; }
-
-        /* Action Buttons */
-        .action-row { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-track {
-            flex: 1; text-align: center; background: #2563eb; color: white;
-            padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold;
-            transition: 0.2s;
+        .action-btn {
+            display: block; width: 100%; padding: 11px; margin-top: 16px;
+            text-align: center; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 14px;
+            transition: filter 0.2s, transform .15s;
         }
-        .btn-track:hover { background: #1d4ed8; }
+        .btn-track { background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white; box-shadow: 0 4px 12px rgba(234,88,12,0.25); }
+        .btn-feedback { background-color: #10b981; color: white; }
+        .action-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
 
-        .btn-feedback {
-            flex: 1; text-align: center; background: #10b981; color: white;
-            padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold;
+        .no-data { text-align: center; padding: 48px 20px; color: #94a3b8; background: white; border-radius: 12px; border: 1px dashed var(--primary-line); }
+        .no-data h3 { color: var(--dark); margin-top: 0; }
+
+        /* --- PROFILE MODAL POPUP --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px);
+            justify-content: center; align-items: center; z-index: 200;
         }
+        .modal-card {
+            background: white; width: 400px; max-width: 94vw; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: scaleIn 0.2s ease;
+        }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-header-bg {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: white; padding: 30px 20px; text-align: center; position: relative;
+        }
+        .modal-close { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.18); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 14px; cursor: pointer; }
+        .modal-close:hover { background: rgba(255,255,255,0.3); }
+        .modal-avatar { width: 62px; height: 62px; background: white; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: bold; margin: 0 auto 10px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .modal-body { padding: 24px; }
+        .profile-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; gap: 12px; }
+        .profile-row span:first-child { color: var(--muted); font-weight: 500; }
+        .profile-row span:last-child { color: var(--dark); font-weight: 700; text-align: right; word-break: break-all; }
+        .modal-close-btn { width: 100%; margin-top: 14px; padding: 11px; background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .modal-close-btn:hover { filter: brightness(1.06); }
 
-        .empty-state { text-align: center; color: #64748b; padding: 40px; background: white; border-radius: 10px; }
+        @media (max-width: 640px) {
+            .stats { grid-template-columns: 1fr; }
+            .content { padding: 22px 16px; }
+            .nav-title { font-size: 15px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="navbar">
-    <h2>🎁 Client Portal</h2>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <span class="logo-text">🎁 Client <span>Portal</span></span>
+        <!-- Hamburger positioned at the top right of the sidebar -->
+        <button class="sidebar-hamburger" onclick="toggleSidebar()">☰</button>
+    </div>
+    <ul class="sidebar-menu">
+        <li class="active"><a href="#" id="navDashboard">📊 <span>Dashboard</span></a></li>
+        <li><a href="#" id="navShipments">📦 <span>My Shipments</span></a></li>
+        <li><a href="#" id="navRequestOrder">➕ <span>Request New Order</span></a></li>
+        <li><a href="receiver_settings.html?id=R003" id="navSettings">⚙️ <span>Account Settings</span></a></li>
+    </ul>
 </div>
 
-<div class="container">
-    <h2 class="greeting" id="greetingText">Loading your shipments...</h2>
-    <div id="shipmentList"></div>
+<!-- MAIN CONTAINER -->
+<div class="main-container">
+    <!-- TOP NAVBAR -->
+    <div class="navbar">
+        <span class="nav-title">Fleet Management System</span>
+
+        <!-- PROFILE BADGE & POPUP MENU -->
+        <div class="profile-container">
+            <div class="profile-avatar" id="avatarLetter" onclick="toggleProfileMenu()">R</div>
+
+            <div class="profile-dropdown" id="profileDropdown">
+                <div class="dropdown-header">
+                    <div class="avatar-large" id="avatarLargeLetter">R</div>
+                    <div id="dropdownReceiverId" style="font-weight: bold; color: var(--dark);">Client R003</div>
+                    <div style="font-size: 12px; color: #64748b;">Verified Receiver Account</div>
+                </div>
+                <div class="dropdown-body">
+                    <button class="dropdown-item" onclick="refreshData()">🔄 Refresh Shipments</button>
+                    <button class="dropdown-item" onclick="showProfileModal()">👤 See My Profile</button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" onclick="logout()" style="color: #dc2626;">🚪 Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT BODY -->
+    <div class="content">
+        <h1 id="welcomeTitle">Welcome back! 👋</h1>
+        <p class="page-sub">Here's an overview of your shipments.</p>
+
+        <div class="stats" id="statsRow">
+            <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Shipments</div></div>
+            <div class="stat accent"><div class="num" id="statActive">0</div><div class="lbl">In Progress</div></div>
+            <div class="stat"><div class="num" id="statDone">0</div><div class="lbl">Completed</div></div>
+        </div>
+
+        <div class="section-title">Your Shipments</div>
+        <div id="shipmentsContainer">
+            <p style="text-align: center; color: #64748b;">Loading your shipments...</p>
+        </div>
+    </div>
+</div>
+
+<!-- PROFILE DETAILS MODAL -->
+<div class="modal-overlay" id="profileModal">
+    <div class="modal-card">
+        <div class="modal-header-bg">
+            <button class="modal-close" onclick="closeProfileModal()">✕</button>
+            <div class="modal-avatar" id="modalAvatar">R</div>
+            <h3 id="modalName" style="margin:0;">Loading...</h3>
+            <span id="modalCompany" style="font-size: 13px; color: #ffedd5;">Company Name</span>
+        </div>
+        <div class="modal-body">
+            <div class="profile-row"><span>Receiver ID:</span> <span id="modalId">-</span></div>
+            <div class="profile-row"><span>Email:</span> <span id="modalEmail">-</span></div>
+            <div class="profile-row"><span>Phone:</span> <span id="modalPhone">-</span></div>
+            <div class="profile-row"><span>Account Status:</span> <span style="color: #16a34a;">Active & Verified</span></div>
+            <button class="modal-close-btn" onclick="closeProfileModal()">Close</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    // 1. Extract the receiver ID from the URL (e.g., ?id=R001)
+    // Extract Receiver ID from URL query params (e.g. ?id=R003)
     const urlParams = new URLSearchParams(window.location.search);
-    const receiverId = urlParams.get('id');
+    const receiverId = urlParams.get('id') || "R001";
 
-    if (!receiverId) {
-        alert("Unauthorized access. Redirecting to login.");
-        window.location.href = "/receiver_login.html";
-    } else {
-        document.getElementById('greetingText').innerText = `Welcome back, Client ${receiverId} 👋`;
-        loadShipments();
-    }
+    // Set Navigation Links Dynamically
+    document.getElementById('navDashboard').href = `receiver_dashboard.html?id=${receiverId}`;
+    document.getElementById('navShipments').href = `receiver_shipments.html?id=${receiverId}`;
+    document.getElementById('navRequestOrder').href = `receiver_request_order.html?id=${receiverId}`;
+    document.getElementById('navSettings').href = `receiver_settings.html?id=${receiverId}`;
 
-    // 2. Fetch shipments from the Javalin backend
-    async function loadShipments() {
+    // Set Profile Letters
+    document.getElementById('avatarLetter').innerText = receiverId.charAt(0).toUpperCase();
+    document.getElementById('avatarLargeLetter').innerText = receiverId.charAt(0).toUpperCase();
+    document.getElementById('dropdownReceiverId').innerText = "Client " + receiverId;
+    document.getElementById('welcomeTitle').innerText = "Welcome back, Client " + receiverId + " 👋";
+
+    // Fetch Shipments on Load
+    window.onload = fetchShipments;
+
+    async function fetchShipments() {
+        const container = document.getElementById('shipmentsContainer');
         try {
             const response = await fetch(`/api/receiver/shipments?id=${receiverId}`);
             const result = await response.json();
 
-            const list = document.getElementById('shipmentList');
-            list.innerHTML = '';
-
             if (result.success && result.data.length > 0) {
-                result.data.forEach(trip => {
-                    // Format the status for CSS styling
-                    let statusClass = trip.status.toLowerCase().replace(' ', '-');
-                    if(!['completed', 'in-progress'].includes(statusClass)) statusClass = 'pending';
+                container.innerHTML = "";
 
-                    // Build the card HTML
-                    const card = document.createElement('div');
-                    card.className = 'card';
+                // Summary counts (display only)
+                const doneCount = result.data.filter(s => s.status.toLowerCase() === 'completed').length;
+                document.getElementById('statTotal').innerText = result.data.length;
+                document.getElementById('statDone').innerText = doneCount;
+                document.getElementById('statActive').innerText = result.data.length - doneCount;
+                document.getElementById('statsRow').style.display = 'grid';
 
-                    // If completed, show feedback button instead of track button
-                    let buttonsHtml = '';
-                    if (statusClass === 'completed') {
-                        buttonsHtml = `<a href="/receiver_feedback.html?tripId=${trip.tripId}" class="btn-feedback">⭐ Submit Feedback</a>`;
+                result.data.forEach(shipment => {
+                    const isCompleted = shipment.status.toLowerCase() === 'completed';
+                    const badgeClass = isCompleted ? 'completed' : 'in-progress';
+
+                    let actionHtml = '';
+                    if (isCompleted) {
+                        if (shipment.feedbackSubmitted) {
+                            // If feedback exists in database, show disabled success state
+                            actionHtml = `<div class="action-btn" style="background:#f1f5f9; color:#475569; pointer-events:none; border: 1px solid #cbd5e1;">✅ Delivery Confirmed & Feedback Submitted</div>`;
+                        } else {
+                            actionHtml = `<a href="receiver_feedback.html?tripId=${shipment.tripId}" class="action-btn btn-feedback">⭐ Submit Feedback & Confirm Delivery</a>`;
+                        }
                     } else {
-                        buttonsHtml = `<a href="/receiver_tracking.html?tripId=${trip.tripId}" class="btn-track">🔍 Track Live Route</a>`;
+                        actionHtml = `<a href="receiver_tracking.html?tripId=${shipment.tripId}" class="action-btn btn-track">📍 Track Live Route (Vehicle: ${shipment.vehicleId || 'N/A'})</a>`;
                     }
 
-                    card.innerHTML = `
-                            <div class="card-header">
-                                <h3 class="trip-id">Trip ID: ${trip.tripId}</h3>
-                                <span class="status ${statusClass}">${trip.status}</span>
+                    container.innerHTML += `
+                        <div class="shipment-card">
+                            <div class="shipment-header">
+                                <h3 style="margin:0; color:var(--dark);">Trip ID: ${shipment.tripId}</h3>
+                                <span class="badge ${badgeClass}">${shipment.status}</span>
                             </div>
-                            <p class="route-info">📍 ${trip.source} ➔ ${trip.destination}</p>
-                            <p class="date-info">📅 Expected Delivery: ${trip.expectedDate || 'TBD'}</p>
-                            <div class="action-row">
-                                ${buttonsHtml}
+                            <div class="shipment-details">
+                                <p>📍 <b>Route:</b> ${shipment.source} → ${shipment.destination}</p>
+                                <p>📅 <b>Expected Delivery:</b> ${shipment.expectedDate || 'Not Set'}</p>
                             </div>
-                        `;
-                    list.appendChild(card);
-                });
-            } else {
-                list.innerHTML = `
-                        <div class="empty-state">
-                            <h3>No Shipments Found</h3>
-                            <p>You don't have any active or past shipments assigned to your account.</p>
+                            ${actionHtml}
                         </div>
                     `;
+                });
+            } else {
+                document.getElementById('statsRow').style.display = 'none';
+                container.innerHTML = `
+                    <div class="no-data">
+                        <h3>No Shipments Found</h3>
+                        <p>You don't have any active or past shipments assigned to your account.</p>
+                    </div>
+                `;
             }
         } catch (e) {
-            document.getElementById('shipmentList').innerHTML = '<p style="color: red; text-align:center;">Error loading shipments from server.</p>';
+            container.innerHTML = `<div class="no-data" style="color:#dc2626;">Error loading shipments from server.</div>`;
         }
     }
 
-    // 3. Logout function
+    // --- TOGGLE SIDEBAR COLLAPSE ---
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+    }
+
+    // --- TOGGLE PROFILE POPUP MENU ---
+    function toggleProfileMenu() {
+        const menu = document.getElementById('profileDropdown');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Close dropdown if clicked outside
+    window.onclick = function(event) {
+        if (!event.target.closest('.profile-container')) {
+            document.getElementById('profileDropdown').style.display = 'none';
+        }
+    }
+
+    // --- DROPDOWN ACTIONS ---
+    function refreshData() {
+        document.getElementById('profileDropdown').style.display = 'none';
+        fetchShipments();
+        alert("Shipments list refreshed!");
+    }
+
+    // --- PROFILE MODAL LOGIC ---
+    async function showProfileModal() {
+        document.getElementById('profileDropdown').style.display = 'none';
+
+        // Fetch receiver details from backend
+        try {
+            const response = await fetch(`/api/receiver/details?id=${receiverId}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const data = result.data;
+                document.getElementById('modalName').innerText = data.name;
+                document.getElementById('modalCompany').innerText = data.companyName;
+                document.getElementById('modalId').innerText = data.receiverId;
+                document.getElementById('modalEmail').innerText = data.email;
+                document.getElementById('modalPhone').innerText = data.phone;
+                document.getElementById('modalAvatar').innerText = data.name.charAt(0).toUpperCase();
+            } else {
+                document.getElementById('modalName').innerText = "Client " + receiverId;
+                document.getElementById('modalCompany').innerText = "Partner Enterprise";
+                document.getElementById('modalId').innerText = receiverId;
+                document.getElementById('modalEmail').innerText = "Not Available";
+                document.getElementById('modalPhone').innerText = "Not Available";
+            }
+        } catch(e) {
+            document.getElementById('modalName').innerText = "Client " + receiverId;
+            document.getElementById('modalId').innerText = receiverId;
+        }
+
+        document.getElementById('profileModal').style.display = 'flex';
+    }
+
+    function closeProfileModal() {
+        document.getElementById('profileModal').style.display = 'none';
+    }
+
     function logout() {
-        window.location.href = "/index.html";
+        window.location.replace('/receiver_login.html');
     }
 </script>
 </body>

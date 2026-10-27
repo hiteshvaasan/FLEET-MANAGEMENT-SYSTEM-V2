@@ -57,14 +57,15 @@ public class TripController implements Initializable {
     @FXML private DatePicker tripDatePicker;
     @FXML private TextField startOdoField, endOdoField;
     @FXML private ComboBox<String> statusComboBox;
+    @FXML private TextField receiverIdField;
+    @FXML private DatePicker expectedDeliveryPicker;
 
     // ===== FILTER & TABLE (TRIP) =====
     @FXML private ComboBox<String> filterCategoryComboBox;
     @FXML private TextField searchField;
     @FXML private TableView<Trip> tripTable;
-    @FXML private TableColumn<Trip, String> colTripId, colVehicleId, colDriverId, colSource, colDestination;
-    @FXML private TableColumn<Trip, LocalDate> colDate;
-    @FXML private TableColumn<Trip, String> colStatus;
+    @FXML private TableColumn<Trip, String> colTripId, colVehicleId, colDriverId, colReceiverId, colSource, colDestination;
+    @FXML private TableColumn<Trip, LocalDate> colDate, colExpectedDate;    @FXML private TableColumn<Trip, String> colStatus;
     @FXML private TableColumn<Trip, Double> colTotalCost;
 
     // ===== PANE SWITCHING VARIABLES =====
@@ -155,9 +156,11 @@ public class TripController implements Initializable {
         colTripId.setCellValueFactory(new PropertyValueFactory<>("tripId"));
         colVehicleId.setCellValueFactory(new PropertyValueFactory<>("vehicleId"));
         colDriverId.setCellValueFactory(new PropertyValueFactory<>("driverId"));
+        colReceiverId.setCellValueFactory(new PropertyValueFactory<>("receiverId")); // ADD THIS LINE
         colSource.setCellValueFactory(new PropertyValueFactory<>("source"));
         colDestination.setCellValueFactory(new PropertyValueFactory<>("destination"));
         colDate.setCellValueFactory(new PropertyValueFactory<>("tripDate"));
+        colExpectedDate.setCellValueFactory(new PropertyValueFactory<>("expectedDeliveryDate")); // ADD THIS LINE
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
 
         // 1. Link Table Columns to Checkpoint Model properties
@@ -376,6 +379,9 @@ public class TripController implements Initializable {
                 startOdoField.setText(newSel.getStartOdometer() != null ? String.valueOf(newSel.getStartOdometer()) : "");
                 endOdoField.setText(newSel.getEndOdometer() != null ? String.valueOf(newSel.getEndOdometer()) : "");
                 statusComboBox.setValue(newSel.getStatus());
+                receiverIdField.setText(newSel.getReceiverId());
+                receiverIdField.getText().trim();
+                expectedDeliveryPicker.setValue(newSel.getExpectedDeliveryDate());
                 calculateDistance();
             }
         });
@@ -447,6 +453,52 @@ public class TripController implements Initializable {
         dialog.showAndWait().ifPresent(selectedId -> vehicleIdField.setText(selectedId));
     }
 
+    @FXML
+    private void showAvailableReceiversPopup() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Registered Receivers");
+        dialog.setHeaderText("Select a receiver for this trip");
+
+        ButtonType selectButtonType = new ButtonType("Select Receiver", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(selectButtonType, ButtonType.CANCEL);
+
+        TableView<com.fleetmanagement.model.Receiver> table = new TableView<>();
+        table.setPrefWidth(500);
+        table.setPrefHeight(200);
+
+        TableColumn<com.fleetmanagement.model.Receiver, String> colId = new TableColumn<>("Receiver ID");
+        colId.setCellValueFactory(new PropertyValueFactory<>("receiverId"));
+        colId.setPrefWidth(100);
+
+        TableColumn<com.fleetmanagement.model.Receiver, String> colName = new TableColumn<>("Name");
+        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colName.setPrefWidth(130);
+
+        TableColumn<com.fleetmanagement.model.Receiver, String> colComp = new TableColumn<>("Company");
+        colComp.setCellValueFactory(new PropertyValueFactory<>("companyName"));
+        colComp.setPrefWidth(150);
+
+        TableColumn<com.fleetmanagement.model.Receiver, String> colPhone = new TableColumn<>("Phone");
+        colPhone.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        colPhone.setPrefWidth(120);
+
+        table.getColumns().addAll(colId, colName, colComp, colPhone);
+
+        com.fleetmanagement.dao.ReceiverDAO receiverDAO = new com.fleetmanagement.dao.ReceiverDAO();
+        table.getItems().addAll(receiverDAO.getAllReceivers());
+
+        dialog.getDialogPane().setContent(table);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == selectButtonType && table.getSelectionModel().getSelectedItem() != null) {
+                return table.getSelectionModel().getSelectedItem().getReceiverId();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(selectedId -> receiverIdField.setText(selectedId));
+    }
+
     @FXML private void handleAddTrip() {
         if (!validateForm()) return;
         String vId = vehicleIdField.getText().trim();
@@ -497,6 +549,7 @@ public class TripController implements Initializable {
         reqCapacityField.clear(); sourceField.clear(); destinationField.clear();
         tripDatePicker.setValue(null); startOdoField.clear(); endOdoField.clear();
         statusComboBox.setValue(null); tripTable.getSelectionModel().clearSelection();
+        expectedDeliveryPicker.setValue(null);
         if (distanceField != null) distanceField.clear();
     }
 
@@ -507,12 +560,65 @@ public class TripController implements Initializable {
         } else showAlert(Alert.AlertType.ERROR, "Error", "Failed to calculate costs.");
     }
 
+    @FXML
+    private void handleViewReceiver() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Registered Receivers");
+        dialog.setHeaderText("Select a receiver for this trip");
+
+        ButtonType selectButtonType = new ButtonType("Select Receiver", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(selectButtonType, ButtonType.CANCEL);
+
+        TableView<com.fleetmanagement.model.Receiver> table = new TableView<>();
+        table.setPrefWidth(500);
+        table.setPrefHeight(200);
+
+        TableColumn<com.fleetmanagement.model.Receiver, String> colId = new TableColumn<>("Receiver ID");
+        colId.setCellValueFactory(new PropertyValueFactory<>("receiverId"));
+        colId.setPrefWidth(100);
+
+        TableColumn<com.fleetmanagement.model.Receiver, String> colName = new TableColumn<>("Name");
+        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colName.setPrefWidth(130);
+
+        TableColumn<com.fleetmanagement.model.Receiver, String> colComp = new TableColumn<>("Company");
+        colComp.setCellValueFactory(new PropertyValueFactory<>("companyName"));
+        colComp.setPrefWidth(150);
+
+        TableColumn<com.fleetmanagement.model.Receiver, String> colPhone = new TableColumn<>("Phone");
+        colPhone.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        colPhone.setPrefWidth(120);
+
+        table.getColumns().addAll(colId, colName, colComp, colPhone);
+
+        com.fleetmanagement.dao.ReceiverDAO receiverDAO = new com.fleetmanagement.dao.ReceiverDAO();
+        table.getItems().addAll(receiverDAO.getAllReceivers());
+
+        dialog.getDialogPane().setContent(table);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == selectButtonType && table.getSelectionModel().getSelectedItem() != null) {
+                return table.getSelectionModel().getSelectedItem().getReceiverId();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(selectedId -> receiverIdField.setText(selectedId));
+    }
+
+
     private Trip createTripFromFields() {
         Double startOdo = startOdoField.getText().isBlank() ? null : Double.parseDouble(startOdoField.getText().trim());
         Double endOdo = endOdoField.getText().isBlank() ? null : Double.parseDouble(endOdoField.getText().trim());
-        return new Trip(tripIdField.getText().trim(), vehicleIdField.getText().trim(), driverIdField.getText().trim(),
+
+        Trip trip = new Trip(tripIdField.getText().trim(), vehicleIdField.getText().trim(), driverIdField.getText().trim(),
                 sourceField.getText().trim(), destinationField.getText().trim(), tripDatePicker.getValue(),
                 startOdo, endOdo, statusComboBox.getValue(), 0.0, 0.0, 0.0);
+
+        trip.setReceiverId(receiverIdField.getText().trim()); // <-- Ensure this is here
+        trip.setExpectedDeliveryDate(expectedDeliveryPicker.getValue());
+
+        return trip;
     }
 
     private boolean validateForm() {
@@ -1527,8 +1633,14 @@ public class TripController implements Initializable {
     @FXML private void switchToMaintenance() { loadScene("/maintenance_view.fxml", "Maintenance Management"); }
     @FXML private void switchToReports() { loadScene("/report_view.fxml", "Reports"); }
     @FXML private void switchToSettings() { loadScene("/settings_view.fxml", "Settings"); }
+    @FXML private void switchToOrderProof() { loadScene("/orderproof_view.fxml", "Order Proof"); }
+    @FXML private void switchToOrderRequests() { loadScene("/orderrequest_view.fxml", "Order Requests"); }
     @FXML private void switchToIncidents() { loadScene("/incident_view.fxml", "Incident Management"); }
 
+    @FXML
+    private void switchToReceivers() {
+        loadScene("/receiver_view.fxml", "Receiver Management");
+    }
 
     // --- ROUTE TRACKING TAB ---
     @FXML private Button btnTabTracking;

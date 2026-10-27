@@ -30,10 +30,13 @@
             <Label text="  📊    Dashboard" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDashboard"/>
             <Label text="  🚛    Vehicles" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToVehicles"/>
             <Label text="  👨‍✈️    Drivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDrivers"/>
+            <Label text="  🎁    Receivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReceivers"/>
             <Label text="  🛣️    Trips" textFill="WHITE" prefWidth="220" prefHeight="45" style="-fx-background-color: #2563eb; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToTrips"/>
             <Label text="  🔧    Maintenance" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToMaintenance"/>
             <Label text="  🚨    Incidents" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToIncidents"/>
             <Label text="  📈    Reports" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReports"/>
+            <Label text="  📥    Order Requests" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToOrderRequests"/>
+            <Label text="  📦    Order Proof" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToOrderProof"/>
             <Label text="  ⚙️    Settings" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToSettings"/>
         </VBox>
     </left>
@@ -83,13 +86,17 @@
                                 <ColumnConstraints minWidth="180"/>
                             </columnConstraints>
 
+                            <!-- ROW 0 -->
                             <Label text="Trip ID" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
                             <TextField fx:id="tripIdField" promptText="e.g. T001" style="-fx-background-radius: 6;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
                             <Label text="Status" style="-fx-font-weight: bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
                             <ComboBox fx:id="statusComboBox" prefWidth="180" style="-fx-background-radius: 6;" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
 
+                            <!-- ROW 1 -->
                             <Label text="Req. Capacity (kg)" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                             <TextField fx:id="reqCapacityField" promptText="e.g. 4500" style="-fx-background-radius: 6;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
                             <Label text="Vehicle ID" style="-fx-font-weight: bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
                             <HBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="3">
                                 <TextField fx:id="vehicleIdField" promptText="e.g. V001" prefWidth="120" style="-fx-background-radius: 6;"/>
@@ -97,29 +104,49 @@
                                         style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
                             </HBox>
 
+                            <!-- ROW 2 -->
                             <Label text="Driver ID" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
                             <HBox spacing="8" GridPane.rowIndex="2" GridPane.columnIndex="1">
                                 <TextField fx:id="driverIdField" promptText="e.g. D001" prefWidth="120" style="-fx-background-radius: 6;"/>
                                 <Button text="🔍 View" onAction="#showAvailableDriversPopup" prefWidth="75"
                                         style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
                             </HBox>
+
                             <Label text="Trip Date" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
                             <DatePicker fx:id="tripDatePicker" prefWidth="180" style="-fx-background-radius: 6;" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
 
-                            <Label text="Source" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                            <TextField fx:id="sourceField" promptText="e.g. Vellore" style="-fx-background-radius: 6;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-                            <Label text="Destination" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
-                            <TextField fx:id="destinationField" promptText="e.g. Chennai" style="-fx-background-radius: 6;" GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+                            <!-- ROW 3: Receiver ID on its own row to prevent overlap -->
+                            <Label text="Receiver ID" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                            <HBox spacing="8" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                                <TextField fx:id="receiverIdField" promptText="e.g. R001" prefWidth="120" style="-fx-background-radius: 6;"/>
+                                <Button text="🔍 View" fx:id="btnViewReceiver" onAction="#handleViewReceiver" prefWidth="75"
+                                        style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 6; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                            </HBox>
 
-                            <Label text="Start Odo" style="-fx-font-weight: bold;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                            <TextField fx:id="startOdoField" promptText="e.g. 45000" style="-fx-background-radius: 6;" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-                            <Label text="End Odo" style="-fx-font-weight: bold;" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
-                            <TextField fx:id="endOdoField" promptText="e.g. 45140" style="-fx-background-radius: 6;" GridPane.rowIndex="4" GridPane.columnIndex="3"/>
+                            <!-- ADD THESE TWO LINES FOR EXPECTED DELIVERY -->
+                            <Label text="Exp. Delivery" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                            <DatePicker fx:id="expectedDeliveryPicker" prefWidth="180" style="-fx-background-radius: 6;" GridPane.rowIndex="3" GridPane.columnIndex="3"/>
 
-                            <Label text="Distance (km)" style="-fx-font-weight: bold;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                            <!-- ROW 4: Shifted Source and Destination down -->
+                            <Label text="Source" style="-fx-font-weight: bold;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                            <TextField fx:id="sourceField" promptText="e.g. Vellore" style="-fx-background-radius: 6;" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                            <Label text="Destination" style="-fx-font-weight: bold;" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+                            <TextField fx:id="destinationField" promptText="e.g. Chennai" style="-fx-background-radius: 6;" GridPane.rowIndex="4" GridPane.columnIndex="3"/>
+
+                            <!-- ROW 5: Shifted Odometers down -->
+                            <Label text="Start Odo" style="-fx-font-weight: bold;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                            <TextField fx:id="startOdoField" promptText="e.g. 45000" style="-fx-background-radius: 6;" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                            <Label text="End Odo" style="-fx-font-weight: bold;" GridPane.rowIndex="5" GridPane.columnIndex="2"/>
+                            <TextField fx:id="endOdoField" promptText="e.g. 45140" style="-fx-background-radius: 6;" GridPane.rowIndex="5" GridPane.columnIndex="3"/>
+
+                            <!-- ROW 6: Shifted Distance down -->
+                            <Label text="Distance (km)" style="-fx-font-weight: bold;" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
                             <TextField fx:id="distanceField" promptText="Auto-calculated" editable="false"
                                        style="-fx-background-radius: 6; -fx-background-color: #f8fafc; -fx-text-fill: #0f172a; -fx-font-weight: bold;"
-                                       GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                                       GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
                         </GridPane>
 
                         <HBox spacing="10">
@@ -159,9 +186,11 @@
                                 <TableColumn fx:id="colTripId" text="Trip ID" prefWidth="80"/>
                                 <TableColumn fx:id="colVehicleId" text="Vehicle" prefWidth="80"/>
                                 <TableColumn fx:id="colDriverId" text="Driver" prefWidth="80"/>
+                                <TableColumn fx:id="colReceiverId" text="Receiver" prefWidth="80"/> <!-- ADD THIS LINE -->
                                 <TableColumn fx:id="colSource" text="Source" prefWidth="120"/>
                                 <TableColumn fx:id="colDestination" text="Destination" prefWidth="120"/>
                                 <TableColumn fx:id="colDate" text="Date" prefWidth="90"/>
+                                <TableColumn fx:id="colExpectedDate" text="Exp. Date" prefWidth="90"/> <!-- ADD THIS LINE -->
                                 <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
                                 <TableColumn fx:id="colTotalCost" text="Total Cost (₹)" prefWidth="100"/>
                             </columns>

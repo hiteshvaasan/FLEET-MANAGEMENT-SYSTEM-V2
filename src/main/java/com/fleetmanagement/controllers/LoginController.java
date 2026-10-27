@@ -1,5 +1,11 @@
 package com.fleetmanagement.controllers;
 
+
+
+import javafx.animation.KeyValue;
+import javafx.animation.ParallelTransition;
+import javafx.scene.Node;
+import javafx.scene.shape.Line;
 import com.fleetmanagement.dao.UserDAO;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -56,6 +62,11 @@ public class LoginController implements Initializable {
     @FXML private StackPane tickBadge;
     @FXML private Label lblSignInCaption;
     @FXML private Label lblSignInSub;
+
+
+    @FXML private Line roadDash;
+    private Timeline roadTimeline;
+    private Timeline bounceTimeline;
 
     private final UserDAO userDAO = new UserDAO();
     private AudioClip audioClip;
@@ -140,7 +151,7 @@ public class LoginController implements Initializable {
     private void triggerSoundVerification() {
         if (lblVerificationStatus != null) {
             lblVerificationStatus.setText("Playing 6-second BGM tune...");
-            lblVerificationStatus.setStyle("-fx-font-size: 11px; -fx-text-fill: #2563eb; -fx-font-weight: bold;");
+            lblVerificationStatus.setStyle("-fx-font-size: 11px; -fx-text-fill: #38bdf8; -fx-font-weight: bold;");
         }
 
         try {
@@ -207,7 +218,7 @@ public class LoginController implements Initializable {
         }
         if (lblVerificationStatus != null) {
             lblVerificationStatus.setText("❌ Verification failed. Try dragging again.");
-            lblVerificationStatus.setStyle("-fx-font-size: 11px; -fx-text-fill: #dc2626; -fx-font-weight: bold;");
+            lblVerificationStatus.setStyle("-fx-font-size: 11px; -fx-text-fill: #f87171; -fx-font-weight: bold;");
         }
         if (btnLogin != null) {
             btnLogin.setDisable(true);
@@ -263,7 +274,6 @@ public class LoginController implements Initializable {
      * enters it, a tick pops up, caption changes to "Success!", then onFinished runs.
      */
     private void playSignInAnimation(Runnable onFinished) {
-        // If the overlay isn't in the FXML for some reason, just continue normally
         if (signInOverlay == null || truckLabel == null || tickBadge == null) {
             onFinished.run();
             return;
@@ -272,15 +282,17 @@ public class LoginController implements Initializable {
         isAnimating = true;
         btnLogin.setDisable(true);
 
-        // ---- reset the scene to its starting state ----
+        // ---- reset scene ----
         truckLabel.setTranslateX(0);
+        truckLabel.setTranslateY(0);
         truckLabel.setOpacity(1);
         truckLabel.setVisible(true);
         tickBadge.setVisible(false);
         tickBadge.setScaleX(0);
         tickBadge.setScaleY(0);
+        if (destBuilding != null) { destBuilding.setScaleX(1); destBuilding.setScaleY(1); }
         lblSignInCaption.setText("Signing in");
-        lblSignInCaption.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+        lblSignInCaption.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;");
         lblSignInSub.setText("Verifying your credentials");
 
         signInOverlay.setOpacity(0);
@@ -288,7 +300,12 @@ public class LoginController implements Initializable {
         signInOverlay.setManaged(true);
         signInOverlay.toFront();
 
-        // ---- animated dots: "Signing in." -> ".." -> "..." ----
+        // card pops in slightly
+        Node card = signInOverlay.getChildren().get(0);
+        card.setScaleX(0.85);
+        card.setScaleY(0.85);
+
+        // ---- animated dots ----
         final int[] dotCount = {0};
         dotsTimeline = new Timeline(new KeyFrame(Duration.millis(400), e -> {
             dotCount[0] = (dotCount[0] % 3) + 1;
@@ -297,45 +314,86 @@ public class LoginController implements Initializable {
         dotsTimeline.setCycleCount(Timeline.INDEFINITE);
         dotsTimeline.play();
 
-        // ---- 1) overlay fades in ----
+        // ---- moving road lines (feels like driving) ----
+        if (roadDash != null) {
+            roadDash.setStrokeDashOffset(0);
+            roadTimeline = new Timeline(
+                    new KeyFrame(Duration.ZERO, new KeyValue(roadDash.strokeDashOffsetProperty(), 0)),
+                    new KeyFrame(Duration.millis(450),
+                            new KeyValue(roadDash.strokeDashOffsetProperty(), 24, Interpolator.LINEAR)));
+            roadTimeline.setCycleCount(Timeline.INDEFINITE);
+            roadTimeline.play();
+        }
+
+        // ---- little truck bounce while driving ----
+        bounceTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(truckLabel.translateYProperty(), 0)),
+                new KeyFrame(Duration.millis(130), new KeyValue(truckLabel.translateYProperty(), -2.5)),
+                new KeyFrame(Duration.millis(260), new KeyValue(truckLabel.translateYProperty(), 0)));
+        bounceTimeline.setCycleCount(Timeline.INDEFINITE);
+        bounceTimeline.play();
+
+        // ---- 1) overlay fade + card scale in ----
         FadeTransition overlayFadeIn = new FadeTransition(Duration.millis(250), signInOverlay);
         overlayFadeIn.setFromValue(0);
         overlayFadeIn.setToValue(1);
+        ScaleTransition cardIn = new ScaleTransition(Duration.millis(300), card);
+        cardIn.setFromX(0.85); cardIn.setFromY(0.85);
+        cardIn.setToX(1); cardIn.setToY(1);
+        cardIn.setInterpolator(Interpolator.EASE_OUT);
+        ParallelTransition intro = new ParallelTransition(overlayFadeIn, cardIn);
 
-        // ---- 2) truck drives to the destination building ----
-        // Increase / decrease 175 if you change the scene width or building positions
-        TranslateTransition drive = new TranslateTransition(Duration.seconds(2.2), truckLabel);
-        drive.setFromX(0);
-        drive.setToX(175);
-        drive.setInterpolator(Interpolator.EASE_BOTH);
+        // ---- 2) truck drives (smooth start + smooth stop) ----
+        Timeline drive = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(truckLabel.translateXProperty(), 0)),
+                new KeyFrame(Duration.seconds(2.2),
+                        new KeyValue(truckLabel.translateXProperty(), 175, Interpolator.EASE_BOTH)));
 
-        // ---- 3) truck "enters" the building (fades out) ----
+        // ---- 3) truck enters building + building pulses ----
         FadeTransition enterBuilding = new FadeTransition(Duration.millis(350), truckLabel);
         enterBuilding.setFromValue(1);
         enterBuilding.setToValue(0);
 
-        // ---- 4) tick pops in ----
+        ParallelTransition arrive;
+        if (destBuilding != null) {
+            ScaleTransition pulse = new ScaleTransition(Duration.millis(180), destBuilding);
+            pulse.setToX(1.18);
+            pulse.setToY(1.18);
+            pulse.setCycleCount(2);
+            pulse.setAutoReverse(true);
+            arrive = new ParallelTransition(enterBuilding, pulse);
+        } else {
+            arrive = new ParallelTransition(enterBuilding);
+        }
+
+        // ---- 4) stop motion, show tick ----
         PauseTransition showTick = new PauseTransition(Duration.millis(50));
         showTick.setOnFinished(e -> {
             if (dotsTimeline != null) dotsTimeline.stop();
+            if (roadTimeline != null) roadTimeline.stop();
+            if (bounceTimeline != null) bounceTimeline.stop();
+            truckLabel.setTranslateY(0);
             tickBadge.setVisible(true);
             lblSignInCaption.setText("Success!");
-            lblSignInCaption.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #16a34a;");
+            lblSignInCaption.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #4ade80;");
             lblSignInSub.setText("Welcome back, opening your dashboard...");
         });
 
-        ScaleTransition tickPop = new ScaleTransition(Duration.millis(450), tickBadge);
-        tickPop.setFromX(0);
-        tickPop.setFromY(0);
-        tickPop.setToX(1);
-        tickPop.setToY(1);
+        // tick pops with a small bounce (overshoot, then settle)
+        ScaleTransition tickPop = new ScaleTransition(Duration.millis(260), tickBadge);
+        tickPop.setFromX(0); tickPop.setFromY(0);
+        tickPop.setToX(1.25); tickPop.setToY(1.25);
         tickPop.setInterpolator(Interpolator.EASE_OUT);
 
-        // ---- 5) short pause so the user can see the success tick ----
+        ScaleTransition tickSettle = new ScaleTransition(Duration.millis(160), tickBadge);
+        tickSettle.setFromX(1.25); tickSettle.setFromY(1.25);
+        tickSettle.setToX(1); tickSettle.setToY(1);
+        tickSettle.setInterpolator(Interpolator.EASE_IN);
+
         PauseTransition hold = new PauseTransition(Duration.millis(900));
 
         SequentialTransition sequence = new SequentialTransition(
-                overlayFadeIn, drive, enterBuilding, showTick, tickPop, hold);
+                intro, drive, arrive, showTick, tickPop, tickSettle, hold);
         sequence.setOnFinished(e -> onFinished.run());
         sequence.play();
     }

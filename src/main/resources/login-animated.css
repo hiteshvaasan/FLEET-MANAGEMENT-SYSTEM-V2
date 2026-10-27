@@ -1,0 +1,129 @@
+/* Dark "glass" login card that matches the animated fleet-map background.
+   Place this file next to style.css (same resources folder as the login FXML). */
+
+.glass-card {
+    -fx-background-color: rgba(8, 16, 34, 0.82);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(56, 189, 248, 0.38);
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(14, 165, 233, 0.35), 40, 0.1, 0, 0);
+}
+
+.card-header {
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #0891b2);
+    -fx-background-radius: 15 15 0 0;
+    -fx-padding: 22 20 22 20;
+}
+
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1f5f9;
+}
+
+.card-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8;
+}
+
+.field-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7dd3fc;
+}
+
+/* Username / password inputs */
+.glass-field {
+    -fx-background-color: rgba(15, 28, 54, 0.95);
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: #1e3a5f;
+    -fx-border-radius: 8;
+    -fx-text-fill: #e2e8f0;
+    -fx-prompt-text-fill: #64748b;
+    -fx-highlight-fill: #0ea5e9;
+    -fx-highlight-text-fill: white;
+    -fx-font-size: 13px;
+}
+
+.glass-field:focused {
+    -fx-background-color: rgba(15, 28, 54, 0.95);
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: #38bdf8;
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.55), 10, 0.2, 0, 0);
+}
+
+/* Show Password check box */
+.glass-check {
+    -fx-font-size: 11px;
+    -fx-text-fill: #94a3b8;
+}
+
+.glass-check .box {
+    -fx-background-color: rgba(15, 28, 54, 0.95);
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+    -fx-border-color: #334e73;
+    -fx-border-radius: 4;
+}
+
+.glass-check:selected .box {
+    -fx-border-color: #38bdf8;
+}
+
+.glass-check:selected .mark {
+    -fx-background-color: #38bdf8;
+}
+
+/* CAPTCHA button */
+.btn-captcha {
+    -fx-background-color: rgba(30, 58, 95, 0.55);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(56, 189, 248, 0.45);
+    -fx-border-radius: 8;
+    -fx-text-fill: #e2e8f0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-captcha:hover {
+    -fx-background-color: rgba(56, 189, 248, 0.22);
+}
+
+/* Sign In button */
+.btn-signin {
+    -fx-background-color: linear-gradient(to right, #2563eb, #0ea5e9);
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-signin:hover {
+    -fx-background-color: linear-gradient(to right, #3b82f6, #38bdf8);
+    -fx-effect: dropshadow(gaussian, rgba(56, 189, 248, 0.6), 14, 0.2, 0, 0);
+}
+
+.btn-signin:disabled {
+    -fx-opacity: 0.45;
+}
+
+/* Back button */
+.btn-back {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-border-color: #4ade80;
+    -fx-border-radius: 8;
+    -fx-text-fill: #4ade80;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-back:hover {
+    -fx-background-color: rgba(74, 222, 128, 0.14);
+}

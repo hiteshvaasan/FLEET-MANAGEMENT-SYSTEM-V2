@@ -4,57 +4,236 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receiver Login - Fleet Management</title>
+
+    <!-- Tesseract.js AI Optical Character Recognition -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+
     <style>
+        :root {
+            --orange-50: #fff7ed;
+            --orange-100: #ffedd5;
+            --orange-200: #fed7aa;
+            --orange-500: #f97316;
+            --orange-600: #ea580c;
+            --orange-700: #c2410c;
+            --ink: #0f172a;
+            --muted: #64748b;
+            --line: #e2e8f0;
+        }
+        * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0f172a;
+            background:
+                    radial-gradient(circle at 20% 15%, rgba(249,115,22,0.22), transparent 45%),
+                    radial-gradient(circle at 85% 90%, rgba(234,88,12,0.15), transparent 40%),
+                    #0f172a;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 16px;
         }
-        .login-card {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 340px;
-            text-align: center;
-        }
-        .icon { font-size: 45px; margin-bottom: 10px; }
-        h2 { margin: 0 0 5px 0; color: #0f172a; font-size: 24px; }
-        p { color: #64748b; font-size: 14px; margin-bottom: 25px; }
 
+        /* ---------- CARD ---------- */
+        .login-card {
+            background: #fff;
+            padding: 0 36px 32px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.45);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: cardIn .5s ease both;
+        }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .login-card::before {
+            content: "";
+            display: block;
+            height: 6px;
+            margin: 0 -36px 28px;
+            background: linear-gradient(90deg, var(--orange-500), var(--orange-600));
+        }
+        .icon {
+            width: 64px; height: 64px;
+            margin: 0 auto 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px;
+            background: var(--orange-50);
+            border: 1px solid var(--orange-200);
+            border-radius: 18px;
+        }
+        h2 { margin: 0 0 4px; color: var(--ink); font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+        .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+
+        .field { text-align: left; margin-bottom: 14px; }
+        .field label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px; letter-spacing: .3px; text-transform: uppercase; }
         input {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
+            padding: 12px 14px;
             border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            box-sizing: border-box;
+            border-radius: 8px;
             font-size: 14px;
+            background: #f8fafc;
+            color: var(--ink);
+            transition: border-color .2s, box-shadow .2s, background .2s;
         }
-        input:focus { outline: none; border-color: #d97706; }
+        input:focus {
+            outline: none;
+            border-color: var(--orange-500);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(249,115,22,0.18);
+        }
 
-        button {
+        /* ---------- SHOW PASSWORD CHECKBOX ---------- */
+        .field .show-pass {
+            display: flex; align-items: center; gap: 8px; margin: 10px 0 0;
+            font-size: 13px; font-weight: 600; color: var(--muted);
+            text-transform: none; letter-spacing: 0; cursor: pointer; user-select: none; width: fit-content;
+        }
+        .field .show-pass:hover { color: var(--orange-700); }
+        .field .show-pass input[type="checkbox"] {
+            width: 16px; height: 16px; padding: 0; margin: 0;
+            accent-color: var(--orange-600); cursor: pointer; box-shadow: none;
+        }
+
+        /* ---------- SECURITY BUTTON ---------- */
+        .verify-btn {
             width: 100%;
             padding: 12px;
-            background-color: #d97706;
+            margin: 4px 0 14px;
+            background-color: var(--orange-50);
+            color: var(--orange-700);
+            border: 1px solid var(--orange-200);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .verify-btn:hover { background-color: var(--orange-100); border-color: var(--orange-500); }
+        .verify-btn.success { background-color: #dcfce7; color: #16a34a; border-color: #86efac; cursor: default; }
+
+        /* ---------- LOGIN BUTTON ---------- */
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, var(--orange-500), var(--orange-600));
             color: white;
             border: none;
-            border-radius: 6px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 700;
             font-size: 16px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: transform .15s, box-shadow .2s, filter .2s;
+            opacity: 0.5;
+            pointer-events: none;
         }
-        button:hover { background-color: #b45309; }
+        .login-btn.active { opacity: 1; pointer-events: auto; box-shadow: 0 6px 16px rgba(234,88,12,0.35); }
+        .login-btn.active:hover { filter: brightness(1.05); transform: translateY(-1px); }
 
-        .error-msg { color: #dc2626; font-size: 13px; margin-bottom: 15px; display: none; font-weight: bold; }
-        .back-link { display: inline-block; margin-top: 20px; color: #3b82f6; text-decoration: none; font-size: 14px; }
+        .error-msg {
+            color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca;
+            padding: 9px 12px; border-radius: 8px;
+            font-size: 13px; margin-bottom: 14px; display: none; font-weight: 600;
+        }
+        .back-link { display: inline-block; margin-top: 20px; color: var(--orange-600); text-decoration: none; font-size: 14px; font-weight: 600; }
         .back-link:hover { text-decoration: underline; }
+
+        /* ---------- HI / BYE GREETER ---------- */
+        .greeter {
+            position: absolute; inset: 0;
+            background: #fff;
+            display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+        .greeter.show { display: flex; }
+        .greeter.visible { opacity: 1; }
+        .bubble {
+            position: relative;
+            background: var(--orange-50);
+            border: 2px solid var(--orange-500);
+            color: var(--orange-700);
+            font-weight: 800; font-size: 22px;
+            padding: 10px 24px; border-radius: 16px;
+            margin-bottom: 18px;
+            animation: pop .45s .25s cubic-bezier(.3,1.6,.5,1) both;
+        }
+        .bubble::after {
+            content: ""; position: absolute; left: 50%; bottom: -10px; margin-left: -8px;
+            width: 14px; height: 14px; background: var(--orange-50);
+            border-right: 2px solid var(--orange-500); border-bottom: 2px solid var(--orange-500);
+            transform: rotate(45deg);
+        }
+        @keyframes pop { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: scale(1); } }
+        .greeter-sub { margin-top: 14px; font-size: 13px; color: var(--muted); }
+        .person { width: 150px; height: 170px; overflow: visible; }
+        .wave-arm { transform-origin: 112px 118px; animation: wave .55s ease-in-out infinite alternate; }
+        @keyframes wave { from { transform: rotate(-18deg); } to { transform: rotate(22deg); } }
+        .greeter.bye .person { animation: sway .6s ease-in-out infinite alternate; }
+        @keyframes sway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+        .greeter.bye .bubble { background: #fef2f2; border-color: #ef4444; color: #b91c1c; }
+        .greeter.bye .bubble::after { background: #fef2f2; border-color: #ef4444; }
+        .greeter.bye .wave-arm { animation-duration: .3s; }
+        .mouth-smile, .mouth-sad { display: none; }
+        .greeter.hi .mouth-smile { display: block; }
+        .greeter.bye .mouth-sad { display: block; }
+
+        /* ---------- DRAWING POPUP MODAL ---------- */
+        .modal-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: white; padding: 0 24px 24px; border-radius: 16px;
+            text-align: center; width: 340px; max-width: 94vw;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+            overflow: hidden;
+            animation: cardIn .3s ease both;
+        }
+        .modal-head {
+            margin: 0 -24px 18px; padding: 14px;
+            background: linear-gradient(135deg, var(--orange-500), var(--orange-600));
+            color: #fff; font-size: 17px; font-weight: 700;
+        }
+        .modal-content p { color: var(--muted); font-size: 13px; margin: 0 0 6px; }
+        .target-number {
+            font-size: 34px; font-weight: 800; color: var(--orange-600);
+            margin: 6px auto 12px; letter-spacing: 8px;
+            background: var(--orange-50); border: 1px solid var(--orange-200);
+            border-radius: 10px; padding: 6px 0; width: 150px;
+        }
+        canvas {
+            border: 2px dashed var(--orange-200); border-radius: 10px;
+            cursor: crosshair; margin-bottom: 8px; touch-action: none;
+            max-width: 100%;
+        }
+        canvas:hover { border-color: var(--orange-500); }
+        .draw-hint { font-size: 12px; color: #94a3b8; margin-bottom: 14px; display: block; }
+
+        .modal-actions { display: flex; gap: 10px; justify-content: space-between; }
+        .modal-btn {
+            flex: 1; padding: 11px; border: none; border-radius: 8px;
+            font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .btn-clear { background: var(--orange-50); color: var(--orange-700); border: 1px solid var(--orange-200); }
+        .btn-clear:hover { background: var(--orange-100); }
+        .btn-submit { background: linear-gradient(135deg, var(--orange-500), var(--orange-600)); color: white; }
+        .btn-submit:hover { filter: brightness(1.07); }
+        .btn-submit:disabled { opacity: .7; cursor: wait; }
     </style>
 </head>
 <body>
@@ -62,32 +241,249 @@
 <div class="login-card">
     <div class="icon">🎁</div>
     <h2>Receiver Portal</h2>
-    <p>Login to track your shipments</p>
+    <p class="subtitle">Login to track your shipments</p>
 
     <div id="errorMsg" class="error-msg">Invalid ID or Password</div>
 
-    <input type="text" id="receiverId" placeholder="Receiver ID (e.g. R001)">
-    <input type="password" id="password" placeholder="Password">
+    <div class="field">
+        <label for="receiverId">Receiver ID</label>
+        <input type="text" id="receiverId" placeholder="Receiver ID (e.g. R001)">
+    </div>
+    <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Password">
+        <label class="show-pass"><input type="checkbox" id="showPass" onchange="togglePassword()"> Show password</label>
+    </div>
 
-    <button onclick="login()">Login</button>
+    <!-- Security Gate -->
+    <button type="button" id="verifyBtn" class="verify-btn" onclick="openVerificationModal()">
+        <span id="verifyIcon">🤖</span> <span id="verifyText">Click to Verify Security</span>
+    </button>
 
-    <a href="index.html" class="back-link">← Back to Main Menu</a>
+    <!-- Login Button -->
+    <button type="button" id="loginBtn" class="login-btn" onclick="login()">Secure Login</button>
+
+    <a href="index.html" class="back-link">← Switch to Driver Portal</a>
+
+    <!-- HI / BYE ANIMATION OVERLAY -->
+    <div id="greeter" class="greeter">
+        <div id="bubble" class="bubble">Hi!</div>
+        <svg class="person" viewBox="0 0 150 170" xmlns="http://www.w3.org/2000/svg">
+            <!-- body -->
+            <path d="M30 170 C30 125 50 112 75 112 C100 112 120 125 120 170 Z" fill="#ea580c"/>
+            <!-- left arm (resting) -->
+            <path d="M38 128 C32 145 34 158 38 168" stroke="#c2410c" stroke-width="12" stroke-linecap="round" fill="none"/>
+            <!-- neck + head -->
+            <rect x="67" y="96" width="16" height="18" rx="6" fill="#fcd9b6"/>
+            <circle cx="75" cy="68" r="34" fill="#fde4c8"/>
+            <!-- hair -->
+            <path d="M41 66 C41 36 62 28 78 30 C98 32 110 46 109 66 C100 52 82 48 41 66 Z" fill="#7c2d12"/>
+            <!-- eyes -->
+            <circle cx="63" cy="70" r="3.5" fill="#0f172a"/>
+            <circle cx="87" cy="70" r="3.5" fill="#0f172a"/>
+            <!-- mouths -->
+            <path class="mouth-smile" d="M62 84 Q75 98 88 84" stroke="#0f172a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path class="mouth-sad" d="M64 90 Q75 80 86 90" stroke="#0f172a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <!-- waving arm + hand -->
+            <g class="wave-arm">
+                <path d="M112 118 C124 100 126 80 122 60" stroke="#c2410c" stroke-width="12" stroke-linecap="round" fill="none"/>
+                <circle cx="122" cy="55" r="9" fill="#fde4c8"/>
+            </g>
+        </svg>
+        <div id="greeterSub" class="greeter-sub"></div>
+    </div>
+</div>
+
+<!-- DRAWING VERIFICATION MODAL -->
+<div id="drawModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-head">🤖 Robo-Verification</div>
+        <p>Please draw the letters below:</p>
+        <div id="targetNumber" class="target-number">AJ</div>
+
+        <!-- Widened canvas to 300px to fit two letters comfortably -->
+        <canvas id="drawCanvas" width="300" height="150"></canvas>
+        <span class="draw-hint">Tip: Draw letters separately and clearly.</span>
+
+        <div class="modal-actions">
+            <button class="modal-btn btn-clear" onclick="clearCanvas()">Clear</button>
+            <button id="submitDrawBtn" class="modal-btn btn-submit" onclick="verifyDrawing()">Verify Drawing</button>
+        </div>
+    </div>
 </div>
 
 <script>
+    // --- VARIABLES ---
+    let isHumanVerified = false;
+    let targetText = "";
+    const targetSets = ["AJ", "HS", "MD", "KM"]; // Custom Letter Sets
+
+    // Canvas Variables
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let inkPixels = 0;
+
+    // --- CANVAS SETUP ---
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#0f172a';
+
+    function clearCanvas() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        inkPixels = 0;
+    }
+
+    clearCanvas();
+
+    function getCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches && e.touches.length > 0) {
+            return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+        }
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+
+    function startDrawing(e) {
+        isDrawing = true;
+        const pos = getCoordinates(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        e.preventDefault();
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        const pos = getCoordinates(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        inkPixels++;
+        e.preventDefault();
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        ctx.closePath();
+    }
+
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    canvas.addEventListener('touchstart', startDrawing, {passive: false});
+    canvas.addEventListener('touchmove', draw, {passive: false});
+    canvas.addEventListener('touchend', stopDrawing);
+
+    // --- MODAL LOGIC ---
+    function openVerificationModal() {
+        if(isHumanVerified) return;
+
+        // Pick a random set from the custom array
+        targetText = targetSets[Math.floor(Math.random() * targetSets.length)];
+        document.getElementById('targetNumber').innerText = targetText;
+
+        clearCanvas();
+        document.getElementById('drawModal').style.display = 'flex';
+    }
+
+    // --- TRUE AI VERIFICATION LOGIC (LETTER MODE) ---
+    async function verifyDrawing() {
+        if (inkPixels < 10) {
+            alert("Please draw the letters on the canvas first.");
+            return;
+        }
+
+        const btn = document.getElementById('submitDrawBtn');
+        btn.innerText = "AI Analyzing... ⏳";
+        btn.disabled = true;
+
+        const dataUrl = canvas.toDataURL('image/png');
+
+        try {
+            const { data: { text } } = await Tesseract.recognize(
+                dataUrl,
+                'eng',
+                { tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ ' } // Whitelist uppercase letters
+            );
+
+            // Clean the AI's reading: Convert to uppercase and remove all spaces/special chars
+            const recognizedText = text.toUpperCase().replace(/[^A-Z]/g, '');
+            console.log("Target was:", targetText, "| AI saw:", recognizedText);
+
+            if (recognizedText.includes(targetText)) {
+
+                document.getElementById('drawModal').style.display = 'none';
+                isHumanVerified = true;
+
+                const verifyBtn = document.getElementById('verifyBtn');
+                verifyBtn.classList.add('success');
+                document.getElementById('verifyIcon').innerText = "✅";
+                document.getElementById('verifyText').innerText = "Human Verified";
+
+                document.getElementById('loginBtn').classList.add('active');
+
+            } else {
+                alert("AI Verification Failed.\nWe asked for '" + targetText + "' but the AI read it as '" + (recognizedText || "?") + "'.\nPlease draw the letters clearly and separately.");
+                clearCanvas();
+            }
+        } catch (err) {
+            console.error(err);
+            alert("AI engine failed to process the image. Please try drawing again.");
+            clearCanvas();
+        }
+
+        btn.innerText = "Verify Drawing";
+        btn.disabled = false;
+    }
+
+    // --- SHOW / HIDE PASSWORD ---
+    function togglePassword() {
+        const pwd = document.getElementById('password');
+        pwd.type = document.getElementById('showPass').checked ? 'text' : 'password';
+    }
+
+    // --- HI / BYE ANIMATION (new, display only) ---
+    function showGreeter(type, name) {
+        const g = document.getElementById('greeter');
+        g.classList.remove('hi', 'bye', 'visible');
+        g.classList.add('show', type);
+        document.getElementById('bubble').innerText = type === 'hi' ? 'Hi, ' + name + '!' : 'Bye!';
+        document.getElementById('greeterSub').innerText =
+            type === 'hi' ? 'Welcome back! Taking you to your dashboard...' : 'Wrong ID or password. Please try again.';
+        // restart bubble pop animation
+        const b = document.getElementById('bubble');
+        b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
+        requestAnimationFrame(() => g.classList.add('visible'));
+    }
+
+    function hideGreeter() {
+        const g = document.getElementById('greeter');
+        g.classList.remove('visible');
+        setTimeout(() => g.classList.remove('show', 'hi', 'bye'), 300);
+    }
+
+    // --- LOGIN LOGIC ---
     async function login() {
         const receiverId = document.getElementById('receiverId').value.trim();
         const password = document.getElementById('password').value.trim();
         const errorMsg = document.getElementById('errorMsg');
 
+        if (!isHumanVerified) {
+            errorMsg.innerText = "Please complete the security verification.";
+            errorMsg.style.display = "block";
+            return;
+        }
         if (!receiverId || !password) {
             errorMsg.innerText = "Please enter both ID and Password.";
             errorMsg.style.display = "block";
             return;
         }
 
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.innerText = "Authenticating...";
+
         try {
-            // Calls the Javalin backend route we set up earlier
             const response = await fetch('/api/receiver/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -98,15 +494,21 @@
 
             if (result.success) {
                 errorMsg.style.display = "none";
-                // Redirects to dashboard with their ID in the URL
-                window.location.href = `/receiver_dashboard.html?id=${receiverId}`;
+                showGreeter('hi', receiverId);                       // person says "Hi"
+                setTimeout(() => {
+                    window.location.href = `/receiver_dashboard.html?id=${receiverId}`;
+                }, 1900);
             } else {
                 errorMsg.innerText = result.message || "Invalid credentials.";
                 errorMsg.style.display = "block";
+                loginBtn.innerText = "Secure Login";
+                showGreeter('bye');                                  // person says "Bye"
+                setTimeout(hideGreeter, 2000);
             }
         } catch (e) {
             errorMsg.innerText = "Server error. Please check your connection.";
             errorMsg.style.display = "block";
+            loginBtn.innerText = "Secure Login";
         }
     }
 </script>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proof of Delivery & Feedback - Fleet Management</title>
+    <style>
+        :root {
+            --primary: #ea580c;
+            --primary-light: #f97316;
+            --primary-soft: #fff7ed;
+            --primary-line: #fed7aa;
+            --dark: #0f172a;
+            --bg: #f8fafc;
+            --muted: #64748b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                    radial-gradient(circle at 15% 10%, rgba(249,115,22,0.12), transparent 40%),
+                    radial-gradient(circle at 90% 95%, rgba(234,88,12,0.09), transparent 40%),
+                    var(--bg);
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+        .feedback-card {
+            background: white; width: 100%; max-width: 560px;
+            border-radius: 16px; overflow: hidden;
+            box-shadow: 0 20px 40px -10px rgba(15,23,42,0.15);
+            border: 1px solid #e2e8f0; position: relative;
+            animation: cardIn .45s ease both;
+        }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: white; padding: 22px 20px; text-align: center;
+        }
+        .card-header .title { font-size: 20px; font-weight: 700; letter-spacing: -0.2px; }
+        .card-header .sub { font-size: 13px; color: #ffedd5; margin-top: 4px; }
+        .card-body { padding: 28px 30px 26px; }
+        .trip-badge {
+            text-align: center; background: var(--primary-soft); border: 1px solid var(--primary-line);
+            padding: 9px; border-radius: 8px; font-weight: 700; color: #9a3412; margin-bottom: 22px; font-size: 14px;
+        }
+        .form-row { display: flex; gap: 15px; }
+        .form-group { flex: 1; margin-bottom: 20px; }
+        .form-group.full { width: 100%; }
+        label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Star Rating Styles */
+        .star-rating { display: flex; gap: 8px; font-size: 30px; cursor: pointer; justify-content: center; margin-bottom: 5px; user-select: none; }
+        .star { color: #cbd5e1; transition: color 0.2s, transform .15s; }
+        .star:hover { transform: scale(1.2); }
+        .star.active { color: #f59e0b; }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1;
+            border-radius: 8px; font-size: 14px;
+            font-family: inherit; background: #f8fafc; color: var(--dark);
+            transition: border-color .2s, box-shadow .2s, background .2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--primary-light); background: #fff;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
+        }
+        textarea { resize: vertical; }
+
+        .file-upload-box {
+            border: 2px dashed var(--primary-line); padding: 16px; text-align: center;
+            border-radius: 10px; background: var(--primary-soft); transition: border-color .2s;
+        }
+        .file-upload-box:hover { border-color: var(--primary-light); }
+        .file-upload-box input[type="file"] { font-size: 13px; color: var(--muted); max-width: 100%; }
+        .file-upload-box input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: white; border: none; padding: 8px 14px; border-radius: 6px;
+            font-weight: 700; cursor: pointer; margin-right: 10px; font-family: inherit;
+        }
+
+        .submit-btn {
+            width: 100%; background: linear-gradient(135deg, var(--primary-light), var(--primary)); color: white;
+            border: none; padding: 14px; border-radius: 8px; font-weight: 700;
+            font-size: 16px; cursor: pointer; transition: filter 0.2s, transform .15s;
+            box-shadow: 0 6px 16px rgba(234,88,12,0.3);
+        }
+        .submit-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+        .back-link { display: block; text-align: center; margin-top: 16px; color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+
+        @media (max-width: 480px) {
+            .form-row { flex-direction: column; gap: 0; }
+            .card-body { padding: 22px 18px; }
+        }
+
+        /* --- DELIVERY ANIMATION OVERLAY --- */
+        .animation-overlay {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.97); z-index: 100;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        .scene {
+            position: relative; width: 88%; height: 130px; margin-bottom: 14px;
+        }
+        .ground {
+            position: absolute; left: 0; right: 0; bottom: 14px; height: 4px; border-radius: 2px;
+            background: repeating-linear-gradient(90deg, var(--primary-line) 0 14px, transparent 14px 24px);
+        }
+        .building-icon { position: absolute; right: 0; bottom: 14px; font-size: 62px; line-height: 1; }
+        .animated-truck {
+            position: absolute; bottom: 14px; left: 0%; font-size: 40px; line-height: 1;
+            transform: scaleX(1);
+            transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .receiver {
+            position: absolute; bottom: 14px; left: 84%; font-size: 38px; line-height: 1; opacity: 0;
+            transition: left 0.9s ease-in-out, opacity .3s;
+        }
+        .receiver.walk { opacity: 1; left: 68%; }
+        .package {
+            position: absolute; bottom: 26px; left: 57%; font-size: 24px; line-height: 1; opacity: 0;
+            transition: left 0.8s ease-in-out, bottom .8s ease-in-out, opacity .2s;
+        }
+        .package.out { opacity: 1; }
+        .package.handover { left: 66%; bottom: 40px; }
+        .speech {
+            position: absolute; bottom: 74px; left: 60%;
+            background: var(--primary-soft); border: 2px solid var(--primary-light); color: #9a3412;
+            font-size: 13px; font-weight: 800; padding: 5px 12px; border-radius: 12px; white-space: nowrap;
+            opacity: 0; transform: scale(.4); transform-origin: bottom center;
+            transition: opacity .25s, transform .35s cubic-bezier(.3,1.6,.5,1);
+        }
+        .speech.show { opacity: 1; transform: scale(1); }
+        .success-tick {
+            font-size: 50px; color: #16a34a; transform: scale(0); height: 60px; line-height: 60px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .success-tick.show { transform: scale(1); }
+        .anim-text { font-weight: 700; color: var(--dark); font-size: 16px; margin-top: 8px; padding: 0 16px; }
+        .anim-sub { font-size: 13px; color: var(--muted); margin-top: 4px; min-height: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="feedback-card">
+    <!-- ANIMATION OVERLAY -->
+    <div class="animation-overlay" id="animOverlay">
+        <div class="scene">
+            <div class="ground"></div>
+            <div class="building-icon">🏢</div>
+            <div class="animated-truck" id="truck">🚚</div>
+            <div class="package" id="pkg">📦</div>
+            <div class="receiver" id="receiverPerson">🧑‍💼</div>
+            <div class="speech" id="speech">Received! 🎉</div>
+        </div>
+        <div class="success-tick" id="successTick">✅</div>
+        <div class="anim-text" id="animText">Delivering shipment to receiver...</div>
+        <div class="anim-sub" id="animSub">Please wait a moment</div>
+    </div>
+
+    <div class="card-header">
+        <div class="title">Proof of Delivery & Feedback</div>
+        <div class="sub">Confirm your delivery and rate the service</div>
+    </div>
+    <div class="card-body">
+        <div class="trip-badge" id="tripIdDisplay">Trip Reference: Loading...</div>
+
+        <form id="feedbackForm" onsubmit="submitDeliveryReport(event)">
+            <div class="form-group full">
+                <label>Overall Service & Delivery Rating</label>
+                <div class="star-rating" id="starContainer">
+                    <span class="star active" data-value="1" onclick="setRating(1)">★</span>
+                    <span class="star active" data-value="2" onclick="setRating(2)">★</span>
+                    <span class="star active" data-value="3" onclick="setRating(3)">★</span>
+                    <span class="star active" data-value="4" onclick="setRating(4)">★</span>
+                    <span class="star active" data-value="5" onclick="setRating(5)">★</span>
+                </div>
+                <input type="hidden" id="ratingValue" value="5">
+            </div>
+
+            <div class="form-group full">
+                <label for="receiverName">Receiver Name</label>
+                <input type="text" id="receiverName" placeholder="Who accepted the goods?" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="deliveredQty">Delivered Qty</label>
+                    <input type="number" id="deliveredQty" placeholder="e.g. 50" required>
+                </div>
+                <div class="form-group">
+                    <label for="deliveryStatus">Status</label>
+                    <select id="deliveryStatus">
+                        <option value="Delivered">Delivered</option>
+                        <option value="Partial Delivery">Partial Delivery</option>
+                        <option value="Damaged Goods">Damaged Goods</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group full">
+                <label>Document / Cargo Photo (POD)</label>
+                <div class="file-upload-box">
+                    <input type="file" id="podPhoto" accept="image/*" onchange="encodeImageFileAsURL(this)">
+                </div>
+            </div>
+
+            <div class="form-group full">
+                <label for="remarks">Remarks / Final Notes</label>
+                <textarea id="remarks" rows="3" placeholder="Any final notes or issues..."></textarea>
+            </div>
+
+            <!-- Updated Button Text -->
+            <button type="submit" class="submit-btn">Submit & Complete Order</button>
+        </form>
+
+        <a href="#" id="backDashboardBtn" class="back-link">← Return to Dashboard</a>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const tripId = urlParams.get('tripId') || "T001";
+    const dashboardId = urlParams.get('id') || "R003";
+
+    document.getElementById('tripIdDisplay').innerText = "Trip Reference: " + tripId;
+    document.getElementById('backDashboardBtn').href = `receiver_dashboard.html?id=${dashboardId}`;
+
+    let currentRating = 5;
+    let base64Image = "";
+
+    // --- Lock the form if feedback was already submitted ---
+    function lockForm() {
+        document.querySelectorAll('#feedbackForm input, #feedbackForm select, #feedbackForm textarea, #feedbackForm button')
+            .forEach(el => el.disabled = true);
+        document.getElementById('starContainer').style.pointerEvents = 'none';
+        document.getElementById('starContainer').style.opacity = '0.6';
+        const btn = document.querySelector('.submit-btn');
+        btn.innerText = "✅ Feedback Already Submitted";
+        btn.style.background = "#94a3b8";
+        btn.style.boxShadow = "none";
+        btn.style.cursor = "not-allowed";
+    }
+
+    async function checkAlreadySubmitted() {
+        try {
+            const r = await fetch(`/api/receiver/feedbackStatus?tripId=${encodeURIComponent(tripId)}`);
+            const j = await r.json();
+            if (j.submitted) lockForm();
+        } catch (e) { console.error(e); }
+    }
+    checkAlreadySubmitted();
+
+    function setRating(rating) {
+        currentRating = rating;
+        document.getElementById('ratingValue').value = rating;
+        document.querySelectorAll('.star').forEach((star, i) => star.classList.toggle('active', i < rating));
+    }
+
+    // --- Resize + compress the photo before sending ---
+    function encodeImageFileAsURL(element) {
+        const file = element.files[0];
+        base64Image = "";
+        if (!file) return;
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            const MAX = 1000;
+            const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            base64Image = canvas.toDataURL('image/jpeg', 0.7);
+            URL.revokeObjectURL(url);
+        };
+        img.src = url;
+    }
+
+    // --- ANIMATION HELPERS (unchanged) ---
+    function resetAnimation() {
+        document.getElementById('truck').style.left = '0%';
+        document.getElementById('receiverPerson').classList.remove('walk');
+        document.getElementById('pkg').classList.remove('out', 'handover');
+        document.getElementById('speech').classList.remove('show');
+        document.getElementById('successTick').classList.remove('show');
+        document.getElementById('animText').innerText = "Delivering shipment to receiver...";
+        document.getElementById('animSub').innerText = "Please wait a moment";
+    }
+
+    function playReceiveAnimation() {
+        const person = document.getElementById('receiverPerson');
+        const pkg = document.getElementById('pkg');
+        const speech = document.getElementById('speech');
+        document.getElementById('animText').innerText = "Shipment arrived!";
+        document.getElementById('animSub').innerText = "Receiver is collecting the package...";
+        person.classList.add('walk');
+        setTimeout(() => { pkg.classList.add('out'); }, 700);
+        setTimeout(() => { pkg.classList.add('handover'); }, 900);
+        setTimeout(() => { speech.classList.add('show'); }, 1800);
+        setTimeout(() => {
+            document.getElementById('successTick').classList.add('show');
+            document.getElementById('animText').innerText = "Delivery Confirmed Successfully!";
+            document.getElementById('animSub').innerText = "Package received by " + document.getElementById('receiverName').value;
+        }, 2400);
+    }
+
+    async function submitDeliveryReport(event) {
+        event.preventDefault();
+
+        const overlay = document.getElementById('animOverlay');
+        const truck = document.getElementById('truck');
+        resetAnimation();
+        overlay.style.display = 'flex';
+        setTimeout(() => { truck.style.left = '50%'; }, 100);
+
+        const payload = {
+            tripId: tripId,
+            rating: currentRating,
+            receiver: document.getElementById('receiverName').value,
+            quantity: document.getElementById('deliveredQty').value,
+            status: document.getElementById('deliveryStatus').value,
+            photoData: base64Image,
+            remarks: document.getElementById('remarks').value
+        };
+
+        try {
+            const response = await fetch('/api/receiver/confirmDelivery', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            let result = {};
+            try { result = await response.json(); } catch (_) {}
+
+            setTimeout(() => {
+                if (result.success) {
+                    playReceiveAnimation();
+                    setTimeout(() => {
+                        window.location.href = `receiver_dashboard.html?id=${dashboardId}`;
+                    }, 3600);
+                } else {
+                    overlay.style.display = 'none';
+                    alert("Error recording delivery confirmation: " + (result.message || ("HTTP " + response.status)));
+                    if (response.status === 409) lockForm();
+                }
+            }, 1500);
+
+        } catch (e) {
+            console.error(e);
+            overlay.style.display = 'none';
+            alert("Server connection error.");
+        }
+    }
+</script>
+</body>
+</html>

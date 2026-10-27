@@ -1,93 +1,191 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.Group?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.shape.Polygon?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.shape.SVGPath?>
 
-<BorderPane fx:id="rootPane" stylesheets="@portal_style.css" styleClass="main-container" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.fleetmanagement.controllers.MainPortalController">
+<StackPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.fleetmanagement.controllers.MainPortalController">
 
-    <!-- HERO HEADER BANNER -->
-    <top>
-        <VBox styleClass="hero-banner">
-            <HBox alignment="CENTER_LEFT" spacing="20">
-                <HBox alignment="CENTER_LEFT" spacing="15" HBox.hgrow="ALWAYS">
-                    <StackPane styleClass="header-icon-container">
-                        <Label text="🚛" styleClass="header-icon"/>
-                    </StackPane>
-                    <VBox alignment="CENTER_LEFT" spacing="2">
-                        <Label text="FLEET MANAGEMENT SYSTEM" styleClass="header-title"/>
-                        <Label text="Track  •  Manage  •  Deliver" styleClass="header-subtitle"/>
-                    </VBox>
+    <!-- ================= MAIN PORTAL (unchanged) ================= -->
+    <BorderPane fx:id="rootPane" stylesheets="@portal_style.css" styleClass="main-container">
+
+        <!-- HERO HEADER BANNER -->
+        <top>
+            <VBox styleClass="hero-banner">
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <HBox alignment="CENTER_LEFT" spacing="15" HBox.hgrow="ALWAYS">
+                        <StackPane styleClass="header-icon-container">
+                            <Label text="🚛" styleClass="header-icon"/>
+                        </StackPane>
+                        <VBox alignment="CENTER_LEFT" spacing="2">
+                            <Label text="FLEET MANAGEMENT SYSTEM" styleClass="header-title"/>
+                            <Label text="Track  •  Manage  •  Deliver" styleClass="header-subtitle"/>
+                        </VBox>
+                    </HBox>
                 </HBox>
-            </HBox>
-        </VBox>
-    </top>
-
-    <!-- CENTER PORTAL WIDGETS -->
-    <center>
-        <VBox alignment="CENTER" spacing="15" styleClass="center-container">
-            <VBox alignment="CENTER" spacing="4">
-                <Label text="Welcome to Fleet Management System" styleClass="welcome-title"/>
-                <Label text="Select your portal to continue" styleClass="welcome-subtitle"/>
             </VBox>
+        </top>
 
-            <HBox alignment="CENTER" spacing="30" styleClass="cards-container">
-
-                <!-- ADMIN CARD WIDGET -->
-                <VBox alignment="TOP_CENTER" spacing="12" styleClass="portal-card, card-admin">
-                    <StackPane styleClass="icon-circle, icon-circle-admin">
-                        <Label text="🖥️" styleClass="card-icon"/>
-                    </StackPane>
-
-                    <Label text="Admin" styleClass="card-title, title-admin"/>
-                    <Label text="Manage vehicles, drivers, trips, maintenance and reports." styleClass="card-description" wrapText="true" textAlignment="CENTER"/>
-
-                    <Button text="➜  Login" onAction="#handleAdminLoginClick" styleClass="card-btn, btn-admin"/>
-
-                    <Region VBox.vgrow="ALWAYS"/>
-                    <Label text="Desktop Application" styleClass="role-badge, badge-admin"/>
+        <!-- CENTER PORTAL WIDGETS -->
+        <center>
+            <VBox alignment="CENTER" spacing="15" styleClass="center-container">
+                <VBox alignment="CENTER" spacing="4">
+                    <Label text="Welcome to Fleet Management System" styleClass="welcome-title"/>
+                    <Label text="Select your portal to continue" styleClass="welcome-subtitle"/>
                 </VBox>
 
-                <!-- DRIVER CARD WIDGET -->
-                <VBox alignment="TOP_CENTER" spacing="12" styleClass="portal-card, card-driver">
-                    <StackPane styleClass="icon-circle, icon-circle-driver">
-                        <Label text="🚚" styleClass="card-icon"/>
-                    </StackPane>
+                <HBox alignment="CENTER" spacing="30" styleClass="cards-container">
 
-                    <Label text="Driver" styleClass="card-title, title-driver"/>
-                    <Label text="View assigned trips, update checkpoints and report issues." styleClass="card-description" wrapText="true" textAlignment="CENTER"/>
+                    <!-- ADMIN CARD WIDGET -->
+                    <VBox alignment="TOP_CENTER" spacing="12" styleClass="portal-card, card-admin">
+                        <StackPane styleClass="icon-circle, icon-circle-admin">
+                            <Label text="🖥️" styleClass="card-icon"/>
+                        </StackPane>
 
-                    <Button text="➜  Login" onAction="#handleDriverLoginClick" styleClass="card-btn, btn-driver"/>
-                    <Button text="📱 Driver QR Portal" onAction="#showDriverQrCodePopup"
-                            style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
-                    <Region VBox.vgrow="ALWAYS"/>
-                    <Label text="In-Vehicle / Mobile" styleClass="role-badge, badge-driver"/>
-                </VBox>
+                        <Label text="Admin" styleClass="card-title, title-admin"/>
+                        <Label text="Manage vehicles, drivers, trips, maintenance and reports." styleClass="card-description" wrapText="true" textAlignment="CENTER"/>
 
-                <!-- RECEIVER CARD WIDGET -->
-                <VBox alignment="TOP_CENTER" spacing="12" styleClass="portal-card, card-receiver">
-                    <StackPane styleClass="icon-circle, icon-circle-receiver">
-                        <Label text="📦" styleClass="card-icon"/>
-                    </StackPane>
+                        <Button text="➜  Login" onAction="#handleAdminLoginClick" styleClass="card-btn, btn-admin"/>
 
-                    <Label text="Receiver" styleClass="card-title, title-receiver"/>
-                    <Label text="Track your shipment and view delivery status." styleClass="card-description" wrapText="true" textAlignment="CENTER"/>
+                        <Region VBox.vgrow="ALWAYS"/>
+                        <Label text="Desktop Application" styleClass="role-badge, badge-admin"/>
+                    </VBox>
 
-                    <Button text="➜  Login" onAction="#handleReceiverTrackingClick" styleClass="card-btn, btn-receiver"/>
-                    <Button text="📱 Receiver QR Portal" onAction="#showReceiverQrCodePopup"
-                            style="-fx-background-color: #d97706; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                    <!-- DRIVER CARD WIDGET -->
+                    <VBox alignment="TOP_CENTER" spacing="12" styleClass="portal-card, card-driver">
+                        <StackPane styleClass="icon-circle, icon-circle-driver">
+                            <Label text="🚚" styleClass="card-icon"/>
+                        </StackPane>
 
-                    <Region VBox.vgrow="ALWAYS"/>
-                    <Label text="Web Portal" styleClass="role-badge, badge-receiver"/>
-                </VBox>
+                        <Label text="Driver" styleClass="card-title, title-driver"/>
+                        <Label text="View assigned trips, update checkpoints and report issues." styleClass="card-description" wrapText="true" textAlignment="CENTER"/>
 
+                        <Button text="➜  Login" onAction="#handleDriverLoginClick" styleClass="card-btn, btn-driver"/>
+                        <Button text="📱 Driver QR Portal" onAction="#showDriverQrCodePopup"
+                                style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                        <Region VBox.vgrow="ALWAYS"/>
+                        <Label text="In-Vehicle / Mobile" styleClass="role-badge, badge-driver"/>
+                    </VBox>
+
+                    <!-- RECEIVER CARD WIDGET -->
+                    <VBox alignment="TOP_CENTER" spacing="12" styleClass="portal-card, card-receiver">
+                        <StackPane styleClass="icon-circle, icon-circle-receiver">
+                            <Label text="📦" styleClass="card-icon"/>
+                        </StackPane>
+
+                        <Label text="Receiver" styleClass="card-title, title-receiver"/>
+                        <Label text="Track your shipment and view delivery status." styleClass="card-description" wrapText="true" textAlignment="CENTER"/>
+
+                        <Button text="➜  Login" onAction="#handleReceiverTrackingClick" styleClass="card-btn, btn-receiver"/>
+                        <Button text="📱 Receiver QR Portal" onAction="#showReceiverQrCodePopup"
+                                style="-fx-background-color: #d97706; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-cursor: hand;"/>
+
+                        <Region VBox.vgrow="ALWAYS"/>
+                        <Label text="Web Portal" styleClass="role-badge, badge-receiver"/>
+                    </VBox>
+
+                </HBox>
+            </VBox>
+        </center>
+
+        <!-- FOOTER BAR -->
+        <bottom>
+            <HBox alignment="CENTER" styleClass="footer-bar">
+                <Label text="© 2026 Fleet Management System  |  VIT BCA Project" styleClass="footer-text"/>
             </HBox>
+        </bottom>
+
+    </BorderPane>
+
+    <!-- ================= ADMIN LOADING OVERLAY (aerial truck draws a "7", large + glow) ================= -->
+    <StackPane fx:id="adminLoadingOverlay" visible="false" managed="false" style="-fx-background-color: rgba(3, 8, 20, 0.93);">
+
+        <VBox alignment="CENTER" maxWidth="620" maxHeight="580" spacing="18"
+              style="-fx-background-color: linear-gradient(to bottom right, rgba(15,27,52,0.98), rgba(8,15,32,0.98)); -fx-background-radius: 24; -fx-border-color: rgba(56,189,248,0.35); -fx-border-width: 1; -fx-border-radius: 24; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.35), 26, 0.1, 0, 0);"
+              StackPane.alignment="CENTER">
+
+            <!-- aerial map area 480 x 320. The 7 runs (96,64) -> (384,64) -> (216,280) -->
+            <Pane prefWidth="480" prefHeight="320" minWidth="480" minHeight="320" maxWidth="480" maxHeight="320"
+                  style="-fx-background-color: linear-gradient(to bottom, rgba(2,8,23,0.85), rgba(8,18,40,0.85)); -fx-background-radius: 18;">
+
+                <clip>
+                    <Rectangle width="480" height="320" arcWidth="36" arcHeight="36"/>
+                </clip>
+
+                <!-- road: soft edge, dark asphalt, dashed centre line -->
+                <SVGPath content="M96,64 L384,64 L216,280" stroke="rgba(56,189,248,0.10)" strokeWidth="46"
+                         fill="transparent" strokeLineCap="ROUND" strokeLineJoin="ROUND"/>
+                <SVGPath content="M96,64 L384,64 L216,280" stroke="#0d1a30" strokeWidth="38"
+                         fill="transparent" strokeLineCap="ROUND" strokeLineJoin="ROUND"/>
+                <SVGPath content="M96,64 L384,64 L216,280" stroke="rgba(148,163,184,0.35)" strokeWidth="2"
+                         fill="transparent" strokeLineJoin="ROUND"
+                         style="-fx-stroke-dash-array: 10 12;"/>
+
+                <!-- start and end markers -->
+                <Circle centerX="96" centerY="64" radius="7" fill="rgba(148,163,184,0.55)"/>
+                <Circle fx:id="endMarker" centerX="216" centerY="280" radius="8" fill="rgba(148,163,184,0.55)"
+                        style="-fx-effect: dropshadow(gaussian, rgba(56,189,248,0.5), 10, 0.2, 0, 0);"/>
+
+                <!-- arrival ring (hidden until the truck arrives) -->
+                <Circle fx:id="endRing" centerX="216" centerY="280" radius="12" fill="transparent"
+                        stroke="#4ade80" strokeWidth="3" opacity="0"/>
+
+                <!-- glowing trail: top bar of the 7 (main line with strong glow) -->
+                <Line fx:id="trailBar" startX="96" startY="64" endX="96" endY="64"
+                      stroke="#38bdf8" strokeWidth="7" strokeLineCap="ROUND"
+                      style="-fx-effect: dropshadow(gaussian, rgba(56,189,248,0.95), 22, 0.4, 0, 0);"/>
+
+                <!-- glowing trail: diagonal stem of the 7 -->
+                <Line fx:id="trailStem" startX="384" startY="64" endX="384" endY="64"
+                      stroke="#38bdf8" strokeWidth="7" strokeLineCap="ROUND"
+                      style="-fx-effect: dropshadow(gaussian, rgba(56,189,248,0.95), 22, 0.4, 0, 0);"/>
+
+                <!-- white-hot cores (follow the main trail automatically) -->
+                <Line startX="96" startY="64" endX="${trailBar.endX}" endY="${trailBar.endY}"
+                      stroke="#e0f2fe" strokeWidth="2.2" strokeLineCap="ROUND"/>
+                <Line startX="384" startY="64" endX="${trailStem.endX}" endY="${trailStem.endY}"
+                      stroke="#e0f2fe" strokeWidth="2.2" strokeLineCap="ROUND"/>
+
+                <!-- the top-down truck (faces right). Everything inside rotates together. -->
+                <Group fx:id="routeTruck" layoutX="96" layoutY="64" scaleX="1.9" scaleY="1.9"
+                       style="-fx-effect: dropshadow(gaussian, rgba(56,189,248,0.9), 16, 0.35, 0, 0);">
+
+                    <!-- headlight beam -->
+                    <Polygon points="24,-3,24,3,85,24,85,-24"
+                             style="-fx-fill: linear-gradient(from 0% 0% to 100% 0%, rgba(186,230,253,0.70), rgba(186,230,253,0.0));"/>
+                    <!-- wheels -->
+                    <Rectangle x="-17" y="-12" width="9" height="3.5" arcWidth="2" arcHeight="2" fill="#020617"/>
+                    <Rectangle x="-17" y="8.5" width="9" height="3.5" arcWidth="2" arcHeight="2" fill="#020617"/>
+                    <Rectangle x="11" y="-12" width="9" height="3.5" arcWidth="2" arcHeight="2" fill="#020617"/>
+                    <Rectangle x="11" y="8.5" width="9" height="3.5" arcWidth="2" arcHeight="2" fill="#020617"/>
+
+                    <!-- cargo box -->
+                    <Rectangle x="-26" y="-9" width="32" height="18" arcWidth="5" arcHeight="5" fill="#38bdf8"/>
+                    <Rectangle x="-23" y="-6.5" width="26" height="4" arcWidth="2" arcHeight="2" fill="#7dd3fc"/>
+
+                    <!-- cab -->
+                    <Rectangle x="7" y="-8" width="18" height="16" arcWidth="5" arcHeight="5" fill="#e0f2fe"/>
+                    <Rectangle x="16" y="-6" width="4.5" height="12" arcWidth="1.5" arcHeight="1.5" fill="#0f172a"/>
+
+                    <!-- headlights -->
+                    <Circle centerX="24.5" centerY="-5" radius="1.8" fill="#fef9c3"/>
+                    <Circle centerX="24.5" centerY="5" radius="1.8" fill="#fef9c3"/>
+                </Group>
+            </Pane>
+
+            <Label fx:id="lblAdminLoadingCaption" text="Loading Admin Portal"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label fx:id="lblAdminLoadingSub" text="Preparing your dashboard..."
+                   style="-fx-font-size: 13px; -fx-text-fill: #94a3b8;"/>
+
+            <ProgressBar fx:id="adminLoadingBar" progress="0" prefWidth="300" prefHeight="7" maxHeight="7"
+                         style="-fx-accent: #38bdf8; -fx-control-inner-background: #1e293b; -fx-background-insets: 0; -fx-padding: 0; -fx-effect: dropshadow(gaussian, rgba(56,189,248,0.45), 8, 0.1, 0, 0);"/>
         </VBox>
-    </center>
+    </StackPane>
 
-    <!-- FOOTER BAR -->
-    <bottom>
-        <HBox alignment="CENTER" styleClass="footer-bar">
-            <Label text="© 2026 Fleet Management System  |  VIT BCA Project" styleClass="footer-text"/>
-        </HBox>
-    </bottom>
-
-</BorderPane>
+</StackPane>

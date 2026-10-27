@@ -29,10 +29,13 @@
             <Label text="  📊    Dashboard" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDashboard"/>
             <Label text="  🚛    Vehicles" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToVehicles"/>
             <Label text="  👨‍✈️    Drivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToDrivers"/>
+            <Label text="  🎁    Receivers" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReceivers"/>
             <Label text="  🛣️    Trips" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToTrips"/>
             <Label text="  🔧    Maintenance" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToMaintenance"/>
             <Label text="  🚨    Incidents" textFill="WHITE" prefWidth="220" prefHeight="45" style="-fx-background-color: #2563eb; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToIncidents"/>
             <Label text="  📈    Reports" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToReports"/>
+            <Label text="  📥    Order Requests" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToOrderRequests"/>
+            <Label text="  📦    Order Proof" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToOrderProof"/>
             <Label text="  ⚙️    Settings" textFill="#cbd5e1" prefWidth="220" prefHeight="45" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" onMouseClicked="#switchToSettings"/>
         </VBox>
     </left>

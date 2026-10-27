@@ -206,7 +206,13 @@ public class DashboardController implements Initializable {
     @FXML private void switchToReports() { loadScene("/report_view.fxml", "Reports", 1050, 680); }
     @FXML private void switchToSettings() { loadScene("/settings_view.fxml", "Settings", 1050, 680); }
     @FXML private void switchToIncidents() { loadScene("/incident_view.fxml", "Incident Management",1050, 680); }
+    @FXML private void switchToOrderProof() { loadScene("/orderproof_view.fxml", "Order Proof",1050, 680); }
 
+    @FXML private void switchToOrderRequests() { loadScene("/orderrequest_view.fxml", "Order Requests",1050, 680); }
+    @FXML
+    private void switchToReceivers() {
+        loadScene("/receiver_view.fxml", "Receiver Management",1050, 680);
+    }
     private void loadScene(String fxmlPath, String title, double width, double height) {
         try {
             URL fileUrl = getClass().getResource(fxmlPath);

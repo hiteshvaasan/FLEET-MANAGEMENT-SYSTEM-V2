@@ -20,8 +20,8 @@ public class TripDAO {
     public boolean addTrip(Trip trip) {
         String sql = "INSERT INTO trips " +
                 "(trip_id, vehicle_id, driver_id, source, destination, trip_date, " +
-                "start_odometer, end_odometer, status, total_fuel_cost, total_toll_cost, total_other_expenses) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "start_odometer, end_odometer, status, total_fuel_cost, total_toll_cost, total_other_expenses,receiver_id,expected_delivery_date) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection conn = DatabaseConnection.getInstance().getConnection();
 
@@ -39,6 +39,10 @@ public class TripDAO {
             pstmt.setDouble(10, trip.getTotalFuelCost() != null ? trip.getTotalFuelCost() : 0.0);
             pstmt.setDouble(11, trip.getTotalTollCost() != null ? trip.getTotalTollCost() : 0.0);
             pstmt.setDouble(12, trip.getTotalOtherExpenses() != null ? trip.getTotalOtherExpenses() : 0.0);
+
+
+            pstmt.setString(13, trip.getReceiverId()); // <-- ADDED THIS LINE FOR RECEIVER ID
+            pstmt.setDate(14, trip.getExpectedDeliveryDate() != null ? Date.valueOf(trip.getExpectedDeliveryDate()) : null);
 
             int rowsInserted = pstmt.executeUpdate();
 
@@ -119,7 +123,7 @@ public class TripDAO {
     // ==============================================================
     public boolean updateTrip(Trip trip) {
         String sql = "UPDATE trips SET vehicle_id = ?, driver_id = ?, source = ?, destination = ?, " +
-                "trip_date = ?, start_odometer = ?, end_odometer = ?, status = ? WHERE trip_id = ?";
+                "trip_date = ?, start_odometer = ?, end_odometer = ?, status = ? ,receiver_id = ?, expected_delivery_date = ? WHERE trip_id = ?";
 
         Connection conn = DatabaseConnection.getInstance().getConnection();
 
@@ -133,7 +137,9 @@ public class TripDAO {
             setNullableDouble(pstmt, 6, trip.getStartOdometer());
             setNullableDouble(pstmt, 7, trip.getEndOdometer());
             pstmt.setString(8, trip.getStatus());
-            pstmt.setString(9, trip.getTripId());
+            pstmt.setString(9, trip.getReceiverId()); // <-- ADDED RECEIVER ID
+            pstmt.setDate(10, trip.getExpectedDeliveryDate() != null ? Date.valueOf(trip.getExpectedDeliveryDate()) : null);
+            pstmt.setString(11, trip.getTripId());
 
             int rowsUpdated = pstmt.executeUpdate();
 
@@ -353,6 +359,10 @@ public class TripDAO {
         trip.setTotalTollCost(rs.wasNull() ? 0.0 : tollCost);
         double otherExpenses = rs.getDouble("total_other_expenses");
         trip.setTotalOtherExpenses(rs.wasNull() ? 0.0 : otherExpenses);
+
+        trip.setReceiverId(rs.getString("receiver_id")); // <-- ADDED THIS LINE
+        Date expDate = rs.getDate("expected_delivery_date");
+        trip.setExpectedDeliveryDate(expDate != null ? expDate.toLocalDate() : null);
         return trip;
     }
 
